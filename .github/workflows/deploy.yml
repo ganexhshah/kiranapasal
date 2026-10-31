@@ -1,0 +1,110 @@
+name: KRM Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy.yml"
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - "backend/**"
+
+jobs:
+  test-and-lint:
+    name: Lint, Static Analysis & Pest Testing
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: krm_test_db
+          POSTGRES_USER: krm_test_user
+          POSTGRES_PASSWORD: krm_test_password
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_pgsql, pgsql, redis, pcntl, bcmath, gd, zip
+          coverage: none
+
+      - name: Copy Testing Environment
+        run: cp backend/.env.example backend/.env
+
+      - name: Install Composer Dependencies
+        working-directory: ./backend
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Generate App Key
+        working-directory: ./backend
+        run: php artisan key:generate
+
+      - name: Run Laravel Pint (Code Style Check)
+        working-directory: ./backend
+        run: ./vendor/bin/pint --test
+
+      - name: Run Larastan / PHPStan (Level 8 Analysis)
+        working-directory: ./backend
+        run: ./vendor/bin/phpstan analyse --memory-limit=1G
+
+      - name: Run Database Migrations
+        working-directory: ./backend
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: krm_test_db
+          DB_USERNAME: krm_test_user
+          DB_PASSWORD: krm_test_password
+        run: php artisan migrate --force
+
+      - name: Execute Pest PHP Test Suite
+        working-directory: ./backend
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: krm_test_db
+          DB_USERNAME: krm_test_user
+          DB_PASSWORD: krm_test_password
+        run: ./vendor/bin/pest
+
+  deploy:
+    name: Deploy to AWS Lightsail
+    needs: test-and-lint
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH to Lightsail Instance
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            cd /opt/krm/backend
+            git pull origin main
+            docker compose build app reverb horizon
+            docker compose up -d --remove-orphans
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+            docker compose exec -T horizon php artisan horizon:terminate
+
