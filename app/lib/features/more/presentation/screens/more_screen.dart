@@ -735,6 +735,20 @@ class _MoreScreenState extends State<MoreScreen> {
                         children: [
                           _buildMoreTile(
                             context: context,
+                            icon: LucideIcons.packageCheck,
+                            iconColor: const Color(0xFF2563EB),
+                            title: 'Product & Inventory Settings',
+                            subtitle: 'Thresholds, units, VAT & barcode rules',
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const ProductSettingsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          _buildMoreTile(
+                            context: context,
                             icon: LucideIcons.printer,
                             iconColor: const Color(0xFF0284C7),
                             title: 'Printer & Receipt Settings',

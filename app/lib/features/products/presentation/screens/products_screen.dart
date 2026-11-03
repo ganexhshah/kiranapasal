@@ -19,6 +19,7 @@ import 'add_product_screen.dart';
 import 'barcode_products_screen.dart';
 import 'low_stock_screen.dart';
 import 'product_details_screen.dart';
+import 'product_settings_screen.dart';
 import '../sheets/adjust_stock_sheet.dart';
 import '../sheets/barcode_scanner_sheet.dart';
 import '../sheets/delete_confirmation_sheet.dart';
@@ -105,12 +106,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  void _showSettingsDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product Settings tapped'),
-        duration: Duration(seconds: 1),
-      ),
+  void _openProductSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const ProductSettingsScreen()),
     );
   }
 
@@ -170,7 +168,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         title: 'Products',
                         onBarcodeTap: _openBarcodeScreen,
                         onAddTap: _showAddProductDialog,
-                        onSettingsTap: _showSettingsDialog,
+                        onSettingsTap: _openProductSettings,
                       ),
                     ),
 

@@ -4,6 +4,7 @@ export 'domain/models/stock_history_entry.dart';
 export 'presentation/screens/add_product_screen.dart';
 export 'presentation/screens/low_stock_screen.dart';
 export 'presentation/screens/product_details_screen.dart';
+export 'presentation/screens/product_settings_screen.dart';
 export 'presentation/screens/products_screen.dart';
 export 'presentation/sheets/add_edit_selling_unit_sheet.dart';
 export 'presentation/sheets/adjust_stock_sheet.dart';
