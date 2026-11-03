@@ -151,3 +151,4 @@ class ProductSettingsService extends ChangeNotifier {
     notifyListeners();
   }
 }
+

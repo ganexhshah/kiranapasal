@@ -25,3 +25,4 @@ void main() {
     expect(scaffold.backgroundColor, Colors.white);
   });
 }
+

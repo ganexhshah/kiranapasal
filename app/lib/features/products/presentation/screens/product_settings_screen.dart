@@ -8,7 +8,8 @@ import '../../../../core/widgets/core_widgets.dart';
 import '../sheets/create_category_sheet.dart';
 import '../sheets/unit_picker_sheet.dart';
 
-/// Comprehensive settings screen for products, inventory thresholds, tax, and barcode preferences.
+/// Clean, lineless Product Settings screen matching the modern Kirana Products theme.
+/// Controls inventory rules, safety stock thresholds, tax, units, and barcode scanning.
 class ProductSettingsScreen extends StatefulWidget {
   const ProductSettingsScreen({super.key});
 
@@ -90,7 +91,7 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
               ),
               const Gap(14),
               const Text(
-                'Select Default VAT / Tax Rate',
+                'Select Default VAT Rate',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
               ),
               const Gap(12),
@@ -100,7 +101,7 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   tileColor: isSelected ? const Color(0xFFEFF6FF) : null,
                   title: Text(
-                    rate == 0.0 ? '0% (Exempt / Grocery)' : '${rate.toInt()}% (${rate == 13.0 ? "Nepal Standard VAT" : "Reduced"})',
+                    rate == 0.0 ? '0% (Exempt)' : '${rate.toInt()}% (${rate == 13.0 ? "Nepal Standard VAT" : "Reduced"})',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -149,12 +150,12 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
               ),
               const Gap(14),
               const Text(
-                'Barcode Label Print Size',
+                'Select Thermal Label Size',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
               ),
               const Gap(12),
               ..._barcodeSizes.map((size) {
-                final isSelected = _settings.barcodeLabelSize.contains(size.split(' ').first);
+                final isSelected = _settings.barcodeLabelSize == size;
                 return ListTile(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   tileColor: isSelected ? const Color(0xFFEFF6FF) : null,
@@ -178,12 +179,12 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
 
     if (picked != null && mounted) {
       await _settings.updateSettings(barcodeLabelSize: picked);
-      _showFeedback('Barcode print size set to $picked');
+      _showFeedback('Barcode sticker size updated');
     }
   }
 
   Future<void> _promptCustomThreshold() async {
-    final controller = TextEditingController(text: _settings.lowStockThreshold.toString());
+    final controller = TextEditingController(text: '${_settings.lowStockThreshold}');
     final result = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -191,12 +192,11 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Quantity threshold',
-            hintText: 'e.g. 8',
+          decoration: InputDecoration(
+            hintText: 'Enter units quantity',
             suffixText: 'units',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
         ),
         actions: [
@@ -271,445 +271,558 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
         final repo = AppDataRepository.instance;
         final products = repo.products;
         final lowStock = repo.lowStockProducts;
-        final outOfStockCount = products.where((p) => p.stock <= 0).length;
-        final totalInventoryValue = products.fold<double>(0.0, (sum, p) => sum + (p.price * p.stock.clamp(0, 999999)));
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(
             statusBarColor: Colors.white,
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
           ),
           child: Scaffold(
-            backgroundColor: const Color(0xFFF8FAFC),
+            backgroundColor: Colors.white,
             body: SafeArea(
               bottom: false,
               child: Column(
                 children: [
-                  // App Top Bar
+                  // App Top Bar matching Products theme
                   AppTopBar(
                     title: 'Product Settings',
-                    leading: IconButton(
-                      icon: const Icon(LucideIcons.arrowLeft, size: 20, color: Color(0xFF0F172A)),
-                      onPressed: () => Navigator.pop(context),
-                    ),
                     actions: [
-                      PopupMenuButton<String>(
-                        icon: const Icon(LucideIcons.moreVertical, size: 20, color: Color(0xFF0F172A)),
-                        onSelected: (val) {
-                          if (val == 'reset') _resetDefaults();
-                          if (val == 'sync') _syncProducts();
-                        },
-                        itemBuilder: (ctx) => [
-                          const PopupMenuItem(
-                            value: 'sync',
-                            child: Row(
-                              children: [
-                                Icon(LucideIcons.refreshCw, size: 16, color: Color(0xFF0F172A)),
-                                Gap(10),
-                                Text('Re-sync Catalog'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'reset',
-                            child: Row(
-                              children: [
-                                Icon(LucideIcons.rotateCcw, size: 16, color: Color(0xFFDC2626)),
-                                Gap(10),
-                                Text('Reset Defaults', style: TextStyle(color: Color(0xFFDC2626))),
-                              ],
-                            ),
-                          ),
-                        ],
+                      IconButton(
+                        icon: _isSyncing
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF2563EB),
+                                ),
+                              )
+                            : const Icon(LucideIcons.refreshCw, size: 19, color: Color(0xFF0F172A)),
+                        tooltip: 'Re-sync Catalog',
+                        onPressed: _isSyncing ? null : _syncProducts,
                       ),
                     ],
                   ),
 
                   // Scrollable Body
                   Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                      children: [
-                        // 1. Inventory Overview Snapshot Card
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
+                    child: RefreshIndicator(
+                      color: const Color(0xFF2563EB),
+                      backgroundColor: Colors.white,
+                      onRefresh: () async {
+                        await AppDataRepository.instance.refreshAll(force: true);
+                      },
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 36),
+                        children: [
+                          // 1. Inventory Summary Row
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                child: Text(
+                                  'Inventory Snapshot',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                              const Gap(6),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'Inventory Snapshot',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white70,
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF7F8FC),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE8F1FF),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: const Icon(LucideIcons.package, size: 18, color: Color(0xFF2563EB)),
+                                          ),
+                                          const Gap(10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '${products.length}',
+                                                  style: const TextStyle(
+                                                    fontSize: 17,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                                const Text(
+                                                  'Total Products',
+                                                  style: TextStyle(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFF64748B),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.18),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '${products.length} Products',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
+                                  const Gap(10),
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF7F8FC),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 36,
+                                            height: 36,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFEECEC),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: const Icon(LucideIcons.triangleAlert, size: 18, color: Color(0xFFEF4444)),
+                                          ),
+                                          const Gap(10),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '${lowStock.length}',
+                                                  style: const TextStyle(
+                                                    fontSize: 17,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: Color(0xFFEF4444),
+                                                  ),
+                                                ),
+                                                const Text(
+                                                  'Low Stock Items',
+                                                  style: TextStyle(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFF64748B),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const Gap(6),
-                              Text(
-                                'Rs. ${totalInventoryValue.toInt()}',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              const Gap(2),
-                              const Text(
-                                'Est. Total Inventory Retail Value',
-                                style: TextStyle(fontSize: 11, color: Colors.white70),
-                              ),
-                              const Gap(12),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.14),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    _statPill('Low Stock', '${lowStock.length}', const Color(0xFFFDE68A)),
-                                    Container(width: 1, height: 16, color: Colors.white24),
-                                    _statPill('Out of Stock', '$outOfStockCount', const Color(0xFFFCA5A5)),
-                                    Container(width: 1, height: 16, color: Colors.white24),
-                                    _statPill('Threshold', '${_settings.lowStockThreshold} units', Colors.white),
-                                  ],
-                                ),
-                              ),
                             ],
                           ),
-                        ),
-                        const Gap(16),
+                          const Gap(18),
 
-                        // 2. Stock & Inventory Alerts
-                        _buildSectionCard(
-                          title: 'Stock & Alert Rules',
-                          icon: LucideIcons.bellRing,
-                          iconColor: const Color(0xFFD97706),
-                          iconBg: const Color(0xFFFFFBEB),
-                          children: [
-                            // Low Stock Threshold selector
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        'Low Stock Warning Threshold',
-                                        style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
-                                      ),
-                                      Text(
-                                        '${_settings.lowStockThreshold} units',
-                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF2563EB)),
-                                      ),
-                                    ],
-                                  ),
-                                  const Gap(4),
-                                  const Text(
-                                    'Items falling to or below this quantity will trigger low stock indicators and notifications.',
-                                    style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
-                                  ),
-                                  const Gap(10),
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
+                          // 2. Stock & Alert Rules
+                          _buildSectionCard(
+                            sectionTitle: 'Stock & Alert Rules',
+                            children: [
+                              // Low stock threshold selector
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        for (final count in [3, 5, 10, 15, 20])
-                                          Padding(
-                                            padding: const EdgeInsets.only(right: 6),
-                                            child: InkWell(
-                                              onTap: () => _settings.updateSettings(lowStockThreshold: count),
-                                              borderRadius: BorderRadius.circular(8),
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                decoration: BoxDecoration(
-                                                  color: _settings.lowStockThreshold == count
-                                                      ? const Color(0xFF2563EB)
-                                                      : const Color(0xFFF1F5F9),
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: Text(
-                                                  '$count units',
-                                                  style: TextStyle(
-                                                    fontSize: 11.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: _settings.lowStockThreshold == count
-                                                        ? Colors.white
-                                                        : const Color(0xFF475569),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                        const Text(
+                                          'Low Stock Warning Threshold',
+                                          style: TextStyle(
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF0F172A),
                                           ),
-                                        InkWell(
-                                          onTap: _promptCustomThreshold,
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF1F5F9),
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: const Color(0xFFCBD5E1)),
-                                            ),
-                                            child: const Row(
-                                              children: [
-                                                Icon(LucideIcons.pencil, size: 11, color: Color(0xFF475569)),
-                                                Gap(4),
-                                                Text('Custom', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
-                                              ],
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            '${_settings.lowStockThreshold} units',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF2563EB),
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Enable low stock alerts
-                            SwitchListTile.adaptive(
-                              value: _settings.enableLowStockAlerts,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(enableLowStockAlerts: val),
-                              title: const Text('Low Stock Alerts & Notifications', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Show visual badges and warnings for depleted goods', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Allow negative stock sales
-                            SwitchListTile.adaptive(
-                              value: _settings.allowNegativeStockSales,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(allowNegativeStockSales: val),
-                              title: const Text('Allow Selling Out-of-Stock Items', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Cashier can bill products even if stock counter is 0', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Hide out of stock items in POS
-                            SwitchListTile.adaptive(
-                              value: _settings.hideOutOfStockInPOS,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(hideOutOfStockInPOS: val),
-                              title: const Text('Hide 0-Stock Items in POS Catalog', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Only show available inventory on quick sales screen', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                          ],
-                        ),
-                        const Gap(16),
-
-                        // 3. Units, Pricing & Tax
-                        _buildSectionCard(
-                          title: 'Units, Pricing & Tax',
-                          icon: LucideIcons.badgePercent,
-                          iconColor: const Color(0xFF2563EB),
-                          iconBg: const Color(0xFFEFF6FF),
-                          children: [
-                            // Default selling unit
-                            ListTile(
-                              onTap: _pickDefaultUnit,
-                              title: const Text('Default Selling Unit', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Applied when adding new items or quick billing', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFEFF6FF),
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: const Color(0xFFBFDBFE)),
+                                    const Gap(10),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          for (final count in [3, 5, 10, 15, 20])
+                                            Padding(
+                                              padding: const EdgeInsets.only(right: 6),
+                                              child: InkWell(
+                                                onTap: () => _settings.updateSettings(lowStockThreshold: count),
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: _settings.lowStockThreshold == count
+                                                        ? const Color(0xFF2563EB)
+                                                        : Colors.white,
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Text(
+                                                    '$count units',
+                                                    style: TextStyle(
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: _settings.lowStockThreshold == count
+                                                          ? Colors.white
+                                                          : const Color(0xFF475569),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          InkWell(
+                                            onTap: _promptCustomThreshold,
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: const Row(
+                                                children: [
+                                                  Icon(LucideIcons.pencil, size: 11, color: Color(0xFF475569)),
+                                                  Gap(4),
+                                                  Text(
+                                                    'Custom',
+                                                    style: TextStyle(
+                                                      fontSize: 11.5,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Color(0xFF475569),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    child: Text(
-                                      _settings.defaultUnit.toUpperCase(),
-                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF2563EB)),
+                                  ],
+                                ),
+                              ),
+
+                              // Enable low stock alerts
+                              SwitchListTile.adaptive(
+                                value: _settings.enableLowStockAlerts,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(enableLowStockAlerts: val),
+                                title: const Text(
+                                  'Low Stock Alerts',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Allow negative stock sales
+                              SwitchListTile.adaptive(
+                                value: _settings.allowNegativeStockSales,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(allowNegativeStockSales: val),
+                                title: const Text(
+                                  'Allow Selling Out-of-Stock Items',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Hide out of stock items in POS
+                              SwitchListTile.adaptive(
+                                value: _settings.hideOutOfStockInPOS,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(hideOutOfStockInPOS: val),
+                                title: const Text(
+                                  'Hide Out-of-Stock in POS',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+                            ],
+                          ),
+                          const Gap(18),
+
+                          // 3. Units, Pricing & Tax
+                          _buildSectionCard(
+                            sectionTitle: 'Units, Pricing & Tax',
+                            children: [
+                              // Default selling unit
+                              ListTile(
+                                onTap: _pickDefaultUnit,
+                                title: const Text(
+                                  'Default Selling Unit',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        _settings.defaultUnit.toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF2563EB),
+                                        ),
+                                      ),
                                     ),
+                                    const Gap(4),
+                                    const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                                  ],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Prices Include VAT
+                              SwitchListTile.adaptive(
+                                value: _settings.priceIncludesTax,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(priceIncludesTax: val),
+                                title: const Text(
+                                  'Prices Include Tax / VAT (MRP)',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Default Tax Rate
+                              ListTile(
+                                onTap: _pickTaxRate,
+                                title: const Text(
+                                  'Default VAT Rate',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        _settings.defaultTaxRate == 0 ? '0% (Exempt)' : '${_settings.defaultTaxRate.toInt()}%',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ),
+                                    const Gap(4),
+                                    const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                                  ],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Allow price edit at checkout
+                              SwitchListTile.adaptive(
+                                value: _settings.allowPriceEditAtPOS,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(allowPriceEditAtPOS: val),
+                                title: const Text(
+                                  'Allow Price Adjustment at Checkout',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+                            ],
+                          ),
+                          const Gap(18),
+
+                          // 4. Barcode & Scanning Preferences
+                          _buildSectionCard(
+                            sectionTitle: 'Barcode & Scanning',
+                            children: [
+                              // Auto-generate barcodes
+                              SwitchListTile.adaptive(
+                                value: _settings.autoGenerateBarcode,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(autoGenerateBarcode: val),
+                                title: const Text(
+                                  'Auto-Generate Barcode & SKU',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Continuous scan mode
+                              SwitchListTile.adaptive(
+                                value: _settings.continuousBarcodeScan,
+                                activeTrackColor: const Color(0xFF2563EB),
+                                onChanged: (val) => _settings.updateSettings(continuousBarcodeScan: val),
+                                title: const Text(
+                                  'Continuous Quick Scan Mode',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+
+                              // Barcode label size
+                              ListTile(
+                                onTap: _pickBarcodeSize,
+                                title: const Text(
+                                  'Barcode Sticker Print Size',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        _settings.barcodeLabelSize.split(' ').first,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ),
+                                    const Gap(4),
+                                    const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                                  ],
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                              ),
+                            ],
+                          ),
+                          const Gap(18),
+
+                          // 5. Category & Catalog Management
+                          _buildSectionCard(
+                            sectionTitle: 'Catalog Actions',
+                            children: [
+                              // Category manager tile
+                              ListTile(
+                                onTap: () async {
+                                  final created = await CreateCategorySheet.show(context);
+                                  if (created != null && mounted) {
+                                    _showFeedback('Category "$created" added');
+                                  }
+                                },
+                                leading: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  const Gap(6),
-                                  const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
-                                ],
+                                  alignment: Alignment.center,
+                                  child: const Icon(LucideIcons.folderPlus, size: 17, color: Color(0xFF2563EB)),
+                                ),
+                                title: const Text(
+                                  'Add / Manage Categories',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                subtitle: Text(
+                                  '${repo.categories.length} categories',
+                                  style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                                ),
+                                trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
 
-                            // Prices Include VAT
-                            SwitchListTile.adaptive(
-                              value: _settings.priceIncludesTax,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(priceIncludesTax: val),
-                              title: const Text('Prices Include Tax / VAT (MRP)', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Retail shelf prices already include VAT on invoice', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Default Tax Rate
-                            ListTile(
-                              onTap: _pickTaxRate,
-                              title: const Text('Default VAT / Tax Rate', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Applied to taxable products during checkout', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _settings.defaultTaxRate == 0 ? '0% (Exempt)' : '${_settings.defaultTaxRate.toInt()}%',
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+                              // Re-sync catalog tile
+                              ListTile(
+                                onTap: _isSyncing ? null : _syncProducts,
+                                leading: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  const Gap(6),
-                                  const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
-                                ],
+                                  alignment: Alignment.center,
+                                  child: _isSyncing
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Color(0xFF2563EB),
+                                          ),
+                                        )
+                                      : const Icon(LucideIcons.refreshCw, size: 17, color: Color(0xFF2563EB)),
+                                ),
+                                title: const Text(
+                                  'Re-sync Product Catalog',
+                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                                ),
+                                trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            ],
+                          ),
+                          const Gap(24),
 
-                            // Allow price edit at checkout
-                            SwitchListTile.adaptive(
-                              value: _settings.allowPriceEditAtPOS,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(allowPriceEditAtPOS: val),
-                              title: const Text('Allow Price Adjustment at Checkout', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Cashier can customize rates on the POS cart item sheet', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                          ],
-                        ),
-                        const Gap(16),
-
-                        // 4. Barcode & Scanner Preferences
-                        _buildSectionCard(
-                          title: 'Barcode & Scanning',
-                          icon: LucideIcons.barcode,
-                          iconColor: const Color(0xFF6366F1),
-                          iconBg: const Color(0xFFEEF2FF),
-                          children: [
-                            // Auto-generate barcodes
-                            SwitchListTile.adaptive(
-                              value: _settings.autoGenerateBarcode,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(autoGenerateBarcode: val),
-                              title: const Text('Auto-Generate Barcode & SKU', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Creates a 6-digit EAN-style barcode for new products if omitted', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Continuous scan mode
-                            SwitchListTile.adaptive(
-                              value: _settings.continuousBarcodeScan,
-                              activeTrackColor: const Color(0xFF2563EB),
-                              onChanged: (val) => _settings.updateSettings(continuousBarcodeScan: val),
-                              title: const Text('Continuous Quick Scan Mode', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Immediately add item +1 upon barcode beep without popups', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Barcode label size
-                            ListTile(
-                              onTap: _pickBarcodeSize,
-                              title: const Text('Barcode Sticker Print Size', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: const Text('Dimension for thermal barcode printers', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _settings.barcodeLabelSize.split(' ').first,
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
-                                  ),
-                                  const Gap(6),
-                                  const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
-                                ],
+                          // Reset to Defaults Button
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: _resetDefaults,
+                              icon: const Icon(LucideIcons.rotateCcw, size: 15, color: Color(0xFFDC2626)),
+                              label: const Text(
+                                'Reset Settings to Defaults',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFDC2626),
+                                ),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                             ),
-                          ],
-                        ),
-                        const Gap(16),
-
-                        // 5. Category & Catalog Management
-                        _buildSectionCard(
-                          title: 'Catalog Actions',
-                          icon: LucideIcons.layoutGrid,
-                          iconColor: const Color(0xFF16A34A),
-                          iconBg: const Color(0xFFF0FDF4),
-                          children: [
-                            // Category manager tile
-                            ListTile(
-                              onTap: () async {
-                                final created = await CreateCategorySheet.show(context);
-                                if (created != null && mounted) {
-                                  _showFeedback('Category "$created" added');
-                                }
-                              },
-                              leading: const Icon(LucideIcons.folderPlus, size: 18, color: Color(0xFF16A34A)),
-                              title: const Text('Add / Manage Categories', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
-                              subtitle: Text('${repo.categories.length} active product categories', style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                            ),
-                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-
-                            // Re-sync catalog tile
-                            ListTile(
-                              onTap: _isSyncing ? null : _syncProducts,
-                              leading: _isSyncing
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF2563EB)),
-                                    )
-                                  : const Icon(LucideIcons.refreshCw, size: 18, color: Color(0xFF2563EB)),
-                              title: Text(
-                                _isSyncing ? 'Synchronizing Catalog...' : 'Re-sync Product Catalog',
-                                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
-                              ),
-                              subtitle: const Text('Pull latest products, prices and stock counts from server', style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B))),
-                              trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const Gap(16),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -721,73 +834,39 @@ class _ProductSettingsScreenState extends State<ProductSettingsScreen> {
     );
   }
 
-  Widget _statPill(String label, String value, Color accentColor) {
+  Widget _buildSectionCard({
+    required String sectionTitle,
+    required List<Widget> children,
+  }) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w500),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Text(
+            sectionTitle,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF64748B),
+              letterSpacing: 0.2,
+            ),
+          ),
         ),
-        const Gap(2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: accentColor,
+        const Gap(6),
+        Material(
+          color: const Color(0xFFF7F8FC),
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSectionCard({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required Color iconBg,
-    required List<Widget> children,
-  }) {
-    return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFF1F5F9)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: iconBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 15, color: iconColor),
-                ),
-                const Gap(10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          ...children,
-        ],
-      ),
     );
   }
 }
