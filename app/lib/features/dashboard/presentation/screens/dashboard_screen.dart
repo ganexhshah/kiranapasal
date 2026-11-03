@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/repositories/app_data_repository.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/services/printing_service.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/utils/parse_utils.dart';
 import '../../../../core/widgets/core_widgets.dart';
@@ -35,13 +37,30 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final AuthService _authService = AuthService();
   int _navIndex = 0;
-  String _userName = '';
+  late String _userName;
   String? _avatarUrl;
-  String _userInitials = 'KO';
+  late String _userInitials;
+
+  static String _calculateInitials(String name) {
+    if (name.isEmpty) return 'KO';
+    final parts = name.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty) {
+      return parts.first.substring(0, parts.first.length >= 2 ? 2 : 1).toUpperCase();
+    }
+    return 'KO';
+  }
 
   @override
   void initState() {
     super.initState();
+    // Instantly populate from cached profile in ApiClient so there is zero initial delay
+    final cachedName = ApiClient.instance.userName ?? '';
+    _userName = cachedName;
+    _avatarUrl = ApiClient.instance.userAvatar;
+    _userInitials = ApiClient.instance.userInitials ?? _calculateInitials(cachedName);
+
     _loadProfile();
     NotificationService.instance.load().then((_) {
       if (mounted) setState(() {});
@@ -69,24 +88,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (user != null) {
         final name = (user['name'] as String?)?.trim() ?? '';
         final avatar = user['avatar_url'] as String?;
-        String initials = 'KO';
-        if (name.isNotEmpty) {
-          final parts = name
-              .split(RegExp(r'\s+'))
-              .where((p) => p.isNotEmpty)
-              .toList();
-          if (parts.length >= 2) {
-            initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-          } else if (parts.isNotEmpty) {
-            initials =
-                parts.first.substring(0, parts.first.length >= 2 ? 2 : 1).toUpperCase();
-          }
-        }
+        final initials = _calculateInitials(name);
+
         setState(() {
           _userName = name;
           _avatarUrl = avatar;
           _userInitials = initials;
         });
+
+        ApiClient.instance.setUserProfile(
+          name: name,
+          avatarUrl: avatar,
+          initials: initials,
+        );
       }
     }
   }
@@ -119,7 +133,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: DashboardHeader(
                     greeting: _userName.isNotEmpty
                         ? 'Hi, ${_userName.split(' ').first}!'
-                        : 'Hi there!',
+                        : (PrintingService.instance.storeName.isNotEmpty &&
+                                PrintingService.instance.storeName != 'Kirana Store'
+                            ? PrintingService.instance.storeName
+                            : 'Welcome!'),
                     userInitials: _userInitials,
                     profileImageUrl: _avatarUrl,
                     hasUnreadNotifications:

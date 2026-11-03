@@ -8,7 +8,7 @@ import '../../../../core/widgets/core_widgets.dart';
 class DashboardHeader extends StatelessWidget {
   const DashboardHeader({
     super.key,
-    this.greeting = 'Hi there!',
+    this.greeting = 'Welcome!',
     this.profileImageUrl,
     this.userInitials = 'KO',
     this.subtitle,

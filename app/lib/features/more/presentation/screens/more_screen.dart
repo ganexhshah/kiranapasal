@@ -51,6 +51,17 @@ class _MoreScreenState extends State<MoreScreen> {
   @override
   void initState() {
     super.initState();
+    final cachedName = ApiClient.instance.userName ?? '';
+    _userName = cachedName;
+    _avatarUrl = ApiClient.instance.userAvatar;
+    if (cachedName.isNotEmpty) {
+      final parts = cachedName.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+      if (parts.length >= 2) {
+        _userInitials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      } else if (parts.isNotEmpty) {
+        _userInitials = parts.first.substring(0, parts.first.length >= 2 ? 2 : 1).toUpperCase();
+      }
+    }
     _loadProfile();
   }
 

@@ -136,7 +136,8 @@ void main() {
 
     // Verify Dashboard Screen Components
     // 1. Header (Greeting, Search & Notifications)
-    expect(find.text('Hi there!'), findsOneWidget);
+    expect(find.byType(DashboardHeader), findsOneWidget);
+    expect(find.text('Welcome!'), findsOneWidget);
 
     // 2. Quick Actions
     expect(find.text('New Sale'), findsOneWidget);

@@ -30,11 +30,21 @@ class AuthService {
 
     if (response.success && response.data != null) {
       final token = response.data!['token'] as String?;
+      final user = response.data!['user'] as Map<String, dynamic>?;
       final shop = response.data!['shop'] as Map<String, dynamic>?;
       final shopId = shop?['id'] as String?;
+      final name = (user?['name'] as String?)?.trim();
+      final avatar = user?['avatar_url'] as String?;
+      final shopName = (shop?['name'] as String?)?.trim();
 
       if (token != null) {
-        await _client.setSession(token: token, shopId: shopId);
+        await _client.setSession(
+          token: token,
+          shopId: shopId,
+          userName: name,
+          userAvatar: avatar,
+          shopName: shopName,
+        );
       }
       if (shop != null) {
         await PrintingService.instance.syncFromShop(shop);
@@ -72,11 +82,21 @@ class AuthService {
 
     if (response.success && response.data != null) {
       final token = response.data!['token'] as String?;
+      final user = response.data!['user'] as Map<String, dynamic>?;
       final shop = response.data!['shop'] as Map<String, dynamic>?;
       final shopId = shop?['id'] as String?;
+      final name = (user?['name'] as String?)?.trim();
+      final avatar = user?['avatar_url'] as String?;
+      final shopName = (shop?['name'] as String?)?.trim();
 
       if (token != null) {
-        await _client.setSession(token: token, shopId: shopId);
+        await _client.setSession(
+          token: token,
+          shopId: shopId,
+          userName: name,
+          userAvatar: avatar,
+          shopName: shopName,
+        );
       }
       if (shop != null) {
         await PrintingService.instance.syncFromShop(shop);
@@ -268,11 +288,21 @@ class AuthService {
 
     if (response.success && response.data != null) {
       final token = response.data!['token'] as String?;
+      final user = response.data!['user'] as Map<String, dynamic>?;
       final shop = response.data!['shop'] as Map<String, dynamic>?;
       final shopId = shop?['id'] as String?;
+      final name = (user?['name'] as String?)?.trim();
+      final avatar = user?['avatar_url'] as String?;
+      final shopName = (shop?['name'] as String?)?.trim();
 
       if (token != null) {
-        await _client.setSession(token: token, shopId: shopId);
+        await _client.setSession(
+          token: token,
+          shopId: shopId,
+          userName: name,
+          userAvatar: avatar,
+          shopName: shopName,
+        );
       }
       if (shop != null) {
         await PrintingService.instance.syncFromShop(shop);
@@ -284,10 +314,28 @@ class AuthService {
 
   /// Get current user profile and active shop context
   Future<ApiResponse<Map<String, dynamic>>> getProfile() async {
-    return _client.get<Map<String, dynamic>>(
+    final response = await _client.get<Map<String, dynamic>>(
       ApiConfig.authMe,
       fromData: (data) => data as Map<String, dynamic>,
     );
+
+    if (response.success && response.data != null) {
+      final user = response.data!['user'] as Map<String, dynamic>?;
+      final shop = (user?['current_shop'] ?? response.data!['shop']) as Map<String, dynamic>?;
+      final name = (user?['name'] as String?)?.trim();
+      final avatar = user?['avatar_url'] as String?;
+      final shopName = (shop?['name'] as String?)?.trim();
+
+      if (name != null || avatar != null || shopName != null) {
+        await _client.setUserProfile(
+          name: name,
+          avatarUrl: avatar,
+          shopName: shopName,
+        );
+      }
+    }
+
+    return response;
   }
 
   /// Update authenticated user profile (name, phone, avatar)
@@ -296,7 +344,7 @@ class AuthService {
     String? phone,
     String? avatarUrl,
   }) async {
-    return _client.put<Map<String, dynamic>>(
+    final response = await _client.put<Map<String, dynamic>>(
       ApiConfig.authUpdateProfile,
       body: {
         'name': name.trim(),
@@ -305,6 +353,12 @@ class AuthService {
       },
       fromData: (data) => data as Map<String, dynamic>,
     );
+
+    if (response.success) {
+      await _client.setUserProfile(name: name, avatarUrl: avatarUrl);
+    }
+
+    return response;
   }
 
   /// Logout and revoke Sanctum token

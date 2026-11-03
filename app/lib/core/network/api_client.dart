@@ -13,44 +13,114 @@ class ApiClient {
 
   static const String _prefTokenKey = 'krm_sanctum_api_token';
   static const String _prefShopIdKey = 'krm_active_shop_id';
+  static const String _prefUserNameKey = 'krm_cached_user_name';
+  static const String _prefUserAvatarKey = 'krm_cached_user_avatar';
+  static const String _prefUserInitialsKey = 'krm_cached_user_initials';
+  static const String _prefShopNameKey = 'krm_cached_shop_name';
 
   String? _authToken;
   String? _activeShopId;
+  String? _userName;
+  String? _userAvatar;
+  String? _userInitials;
+  String? _shopName;
 
   String? get authToken => _authToken;
   String? get activeShopId => _activeShopId;
+  String? get userName => _userName;
+  String? get userAvatar => _userAvatar;
+  String? get userInitials => _userInitials;
+  String? get shopName => _shopName;
   bool get isAuthenticated => _authToken != null && _authToken!.isNotEmpty;
 
-  /// Initialize stored token and shop ID
+  /// Initialize stored token, shop ID, and cached profile data
   Future<void> initialize() async {
     await ApiConfig.initialize();
     try {
       final prefs = await SharedPreferences.getInstance();
       _authToken = prefs.getString(_prefTokenKey);
       _activeShopId = prefs.getString(_prefShopIdKey);
+      _userName = prefs.getString(_prefUserNameKey);
+      _userAvatar = prefs.getString(_prefUserAvatarKey);
+      _userInitials = prefs.getString(_prefUserInitialsKey);
+      _shopName = prefs.getString(_prefShopNameKey);
     } catch (_) {}
   }
 
   /// Store credentials on successful login
-  Future<void> setSession({required String token, String? shopId}) async {
+  Future<void> setSession({
+    required String token,
+    String? shopId,
+    String? userName,
+    String? userAvatar,
+    String? shopName,
+  }) async {
     _authToken = token;
     if (shopId != null) {
       _activeShopId = shopId;
     }
+    if (userName != null && userName.trim().isNotEmpty) {
+      _userName = userName.trim();
+    }
+    if (userAvatar != null) {
+      _userAvatar = userAvatar;
+    }
+    if (shopName != null && shopName.trim().isNotEmpty) {
+      _shopName = shopName.trim();
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefTokenKey, token);
     if (shopId != null) {
       await prefs.setString(_prefShopIdKey, shopId);
     }
+    if (_userName != null) {
+      await prefs.setString(_prefUserNameKey, _userName!);
+    }
+    if (_userAvatar != null) {
+      await prefs.setString(_prefUserAvatarKey, _userAvatar!);
+    }
+    if (_shopName != null) {
+      await prefs.setString(_prefShopNameKey, _shopName!);
+    }
+  }
+
+  /// Persist cached user profile so header loads user data instantly without network lag
+  Future<void> setUserProfile({
+    String? name,
+    String? avatarUrl,
+    String? initials,
+    String? shopName,
+  }) async {
+    if (name != null && name.trim().isNotEmpty) _userName = name.trim();
+    if (avatarUrl != null) _userAvatar = avatarUrl;
+    if (initials != null) _userInitials = initials;
+    if (shopName != null && shopName.trim().isNotEmpty) _shopName = shopName.trim();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (_userName != null) await prefs.setString(_prefUserNameKey, _userName!);
+      if (_userAvatar != null) await prefs.setString(_prefUserAvatarKey, _userAvatar!);
+      if (_userInitials != null) await prefs.setString(_prefUserInitialsKey, _userInitials!);
+      if (_shopName != null) await prefs.setString(_prefShopNameKey, _shopName!);
+    } catch (_) {}
   }
 
   /// Clear session on logout
   Future<void> clearSession() async {
     _authToken = null;
     _activeShopId = null;
+    _userName = null;
+    _userAvatar = null;
+    _userInitials = null;
+    _shopName = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefTokenKey);
     await prefs.remove(_prefShopIdKey);
+    await prefs.remove(_prefUserNameKey);
+    await prefs.remove(_prefUserAvatarKey);
+    await prefs.remove(_prefUserInitialsKey);
+    await prefs.remove(_prefShopNameKey);
   }
 
   Map<String, String> _buildHeaders([Map<String, String>? extraHeaders]) {
