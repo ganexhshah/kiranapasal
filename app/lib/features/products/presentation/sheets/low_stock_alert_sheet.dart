@@ -331,7 +331,7 @@ class _LowStockAlertSheetState extends State<LowStockAlertSheet> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../../../core/theme/theme.dart';
 
@@ -181,7 +181,7 @@ class _AddTaxSheetState extends State<AddTaxSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -235,11 +235,11 @@ class _AddTaxSheetState extends State<AddTaxSheet> {
                   children: [
                     Text(
                       'Calculated Tax (${_formatAmount(_ratePercent)}%)',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF0066FF)),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2563EB)),
                     ),
                     Text(
                       'Rs. ${_formatAmount(_taxAmount)}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0066FF)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF2563EB)),
                     ),
                   ],
                 ),
@@ -263,7 +263,7 @@ class _AddTaxSheetState extends State<AddTaxSheet> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

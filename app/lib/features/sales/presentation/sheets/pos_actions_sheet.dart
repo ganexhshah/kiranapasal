@@ -66,7 +66,7 @@ class POSActionsSheet extends StatelessWidget {
             _actionTile(
               context: context,
               icon: LucideIcons.scanLine,
-              iconColor: const Color(0xFF0066FF),
+              iconColor: const Color(0xFF2563EB),
               title: 'Scan Barcode',
               onTap: () => Navigator.pop(context, POSActionType.scanBarcode),
             ),

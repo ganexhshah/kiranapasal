@@ -282,7 +282,7 @@ class _CreditManagementScreenState extends State<CreditManagementScreen>
     }).toList();
 
     return RefreshIndicator(
-      color: const Color(0xFF0066FF),
+      color: const Color(0xFF2563EB),
       backgroundColor: Colors.white,
       onRefresh: () async {
         await AppDataRepository.instance.refreshAll();
@@ -456,7 +456,7 @@ class _CreditManagementScreenState extends State<CreditManagementScreen>
                     icon: const Icon(LucideIcons.bellRing, size: 14),
                     label: const Text('Remind', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0066FF),
+                      foregroundColor: const Color(0xFF2563EB),
                       side: const BorderSide(color: Color(0xFFBFDBFE)),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       minimumSize: Size.zero,
@@ -485,7 +485,7 @@ class _CreditManagementScreenState extends State<CreditManagementScreen>
     }).toList();
 
     return RefreshIndicator(
-      color: const Color(0xFF0066FF),
+      color: const Color(0xFF2563EB),
       backgroundColor: Colors.white,
       onRefresh: () async {
         await AppDataRepository.instance.refreshAll();
@@ -617,7 +617,7 @@ class _CreditManagementScreenState extends State<CreditManagementScreen>
                       icon: const Icon(LucideIcons.arrowUpRight, size: 14),
                       label: const Text('Pay Supplier', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 8),

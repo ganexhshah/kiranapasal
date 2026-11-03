@@ -56,7 +56,7 @@ class _CategoryPickerSheetState extends State<CategoryPickerSheet> {
     CategoryOption(
       name: 'Grains',
       icon: LucideIcons.wheat,
-      color: Color(0xFF0866FF),
+      color: Color(0xFF2563EB),
       backgroundColor: Color(0xFFE8F1FF),
     ),
     CategoryOption(

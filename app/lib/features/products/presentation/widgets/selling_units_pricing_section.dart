@@ -175,7 +175,7 @@ class _SellingUnitsPricingSectionState extends State<SellingUnitsPricingSection>
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0066FF),
+                backgroundColor: const Color(0xFF2563EB),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(

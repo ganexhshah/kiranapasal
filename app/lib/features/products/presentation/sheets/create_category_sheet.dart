@@ -121,13 +121,13 @@ class _CreateCategorySheetState extends State<CreateCategorySheet> {
                         color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10),
                         border: isSelected
-                            ? Border.all(color: const Color(0xFF0066FF), width: 1.5)
+                            ? Border.all(color: const Color(0xFF2563EB), width: 1.5)
                             : null,
                       ),
                       child: Icon(
                         _icons[i],
                         size: 20,
-                        color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF64748B),
+                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                       ),
                     ),
                   );
@@ -158,7 +158,7 @@ class _CreateCategorySheetState extends State<CreateCategorySheet> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),

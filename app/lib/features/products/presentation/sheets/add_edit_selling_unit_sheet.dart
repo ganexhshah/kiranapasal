@@ -254,7 +254,7 @@ class _AddEditSellingUnitSheetState extends State<AddEditSellingUnitSheet> {
                     ),
                     Switch(
                       value: _isDefault,
-                      activeThumbColor: const Color(0xFF0066FF),
+                      activeThumbColor: const Color(0xFF2563EB),
                       onChanged: (val) => setState(() => _isDefault = val),
                     ),
                   ],
@@ -306,7 +306,7 @@ class _AddEditSellingUnitSheetState extends State<AddEditSellingUnitSheet> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

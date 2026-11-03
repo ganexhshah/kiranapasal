@@ -7,26 +7,26 @@ class AppColors {
   /// Background: #FFFFFF (White)
   static const Color background = Color(0xFFFFFFFF);
 
-  /// Primary blue: #0866FF
-  static const Color primary = Color(0xFF0866FF);
+  /// Primary blue: #2563EB (Clean, professional, non-neon royal blue)
+  static const Color primary = Color(0xFF2563EB);
 
-  /// Deep blue cards: #0849B5
-  static const Color deepBlueCards = Color(0xFF0849B5);
+  /// Deep blue cards: #1E3A8A (Subdued, elegant navy)
+  static const Color deepBlueCards = Color(0xFF1E3A8A);
 
-  /// Input border: #85889A
-  static const Color inputBorder = Color(0xFF85889A);
+  /// Input border: #CBD5E1
+  static const Color inputBorder = Color(0xFFCBD5E1);
 
-  /// Input label: #505465
-  static const Color inputLabel = Color(0xFF505465);
+  /// Input label: #64748B
+  static const Color inputLabel = Color(0xFF64748B);
 
-  /// Light teal: #BFE0DF
-  static const Color lightTeal = Color(0xFFBFE0DF);
+  /// Soft Teal / secondary: #0D9488
+  static const Color lightTeal = Color(0xFF0D9488);
 
-  /// Dark text: #292D38
-  static const Color darkText = Color(0xFF292D38);
+  /// Dark text: #0F172A
+  static const Color darkText = Color(0xFF0F172A);
 
-  /// Secondary surface: #FFFFFF (White)
-  static const Color secondarySurface = Color(0xFFFFFFFF);
+  /// Secondary surface: #F8FAFC
+  static const Color secondarySurface = Color(0xFFF8FAFC);
 }
 
 /// ThemeExtension to access custom palette tokens via `Theme.of(context).extension<AppColorsExtension>()`

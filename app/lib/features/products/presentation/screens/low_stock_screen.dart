@@ -240,7 +240,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
               // Scrollable Body with Drag-to-Refresh & Sliver Virtualization
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
+                  color: const Color(0xFF2563EB),
                   backgroundColor: Colors.white,
                   onRefresh: () async {
                     await AppDataRepository.instance.refreshAll(force: true);
@@ -332,7 +332,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                                     child: _kpiCard(
                                       label: 'Est. Reorder',
                                       value: 'Rs. ${(totalDeficitCost / 1000).toStringAsFixed(1)}k',
-                                      color: const Color(0xFF0066FF),
+                                      color: const Color(0xFF2563EB),
                                       bgColor: const Color(0xFFDBEAFE),
                                       icon: LucideIcons.shoppingBag,
                                     ),
@@ -512,7 +512,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -583,7 +583,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+          color: active ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -795,9 +795,9 @@ class _LowStockScreenState extends State<LowStockScreen> {
                         ),
                         child: const Row(
                           children: [
-                            Icon(LucideIcons.phone, size: 11, color: Color(0xFF0066FF)),
+                            Icon(LucideIcons.phone, size: 11, color: Color(0xFF2563EB)),
                             Gap(4),
-                            Text('Call', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF0066FF))),
+                            Text('Call', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF2563EB))),
                           ],
                         ),
                       ),
@@ -832,7 +832,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0066FF),
+                          color: const Color(0xFF2563EB),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Row(

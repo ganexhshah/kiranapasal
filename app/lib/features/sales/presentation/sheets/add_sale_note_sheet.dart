@@ -126,7 +126,7 @@ class _AddSaleNoteSheetState extends State<AddSaleNoteSheet> {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context, _controller.text.trim()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),

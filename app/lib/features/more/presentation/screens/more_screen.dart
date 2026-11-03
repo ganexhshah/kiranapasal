@@ -386,7 +386,7 @@ class _MoreScreenState extends State<MoreScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
@@ -575,7 +575,7 @@ class _MoreScreenState extends State<MoreScreen> {
               // 2. Scrollable Body with Drag-to-Refresh
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
+                  color: const Color(0xFF2563EB),
                   backgroundColor: Colors.white,
                   onRefresh: _loadProfile,
                   child: SingleChildScrollView(
@@ -650,7 +650,7 @@ class _MoreScreenState extends State<MoreScreen> {
                                   'Edit',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0066FF),
+                                    color: Color(0xFF2563EB),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -781,7 +781,7 @@ class _MoreScreenState extends State<MoreScreen> {
                           _buildMoreTile(
                             context: context,
                             icon: LucideIcons.user,
-                            iconColor: const Color(0xFF0066FF),
+                            iconColor: const Color(0xFF2563EB),
                             title: _userName.isNotEmpty ? _userName : 'My Profile',
                             subtitle: _userEmail.isNotEmpty ? _userEmail : 'Manage personal account details',
                             onTap: _openProfileScreen,

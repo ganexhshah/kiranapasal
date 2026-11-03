@@ -114,7 +114,7 @@ class CreditSaleConfirmationSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('New Sale Amount', style: TextStyle(fontSize: 12.5, color: colors.inputLabel)),
-                      Text('+ Rs. ${amount.toInt()}', style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0xFF0066FF))),
+                      Text('+ Rs. ${amount.toInt()}', style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
                     ],
                   ),
                   const Gap(10),

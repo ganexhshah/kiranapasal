@@ -87,7 +87,7 @@ class POSProductCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF0066FF),
+                      color: Color(0xFF2563EB),
                     ),
                     children: [
                       TextSpan(
@@ -147,7 +147,7 @@ class POSProductCard extends StatelessWidget {
                                 width: 30,
                                 height: 30,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0066FF),
+                                  color: const Color(0xFF2563EB),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 alignment: Alignment.center,

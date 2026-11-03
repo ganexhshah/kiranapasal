@@ -120,7 +120,7 @@ class SaleSuccessSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Payment Method', style: TextStyle(fontSize: 12.5, color: colors.inputLabel)),
-                      Text(sale.paymentMethodName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0066FF))),
+                      Text(sale.paymentMethodName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
                     ],
                   ),
                   const Gap(8),
@@ -203,7 +203,7 @@ class SaleSuccessSheet extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0066FF),
+                  backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

@@ -133,7 +133,7 @@ class PaymentMethodSheet extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0066FF),
+                    color: Color(0xFF2563EB),
                   ),
                 ),
               ],
@@ -152,7 +152,7 @@ class PaymentMethodSheet extends StatelessWidget {
               method: PaymentMethod.qr,
               title: 'QR / Fonepay',
               icon: LucideIcons.qrCode,
-              color: const Color(0xFF0066FF),
+              color: const Color(0xFF2563EB),
             ),
             _buildMethodTile(
               context: context,

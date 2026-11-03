@@ -186,7 +186,7 @@ class ImageSourcePickerSheet extends StatelessWidget {
                             child: const Center(
                               child: Icon(
                                 LucideIcons.camera,
-                                color: Color(0xFF0866FF),
+                                color: Color(0xFF2563EB),
                                 size: 22,
                               ),
                             ),
@@ -364,7 +364,7 @@ class ImageSourcePickerSheet extends StatelessWidget {
               ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(LucideIcons.crop, size: 18, color: Color(0xFF0066FF)),
+                leading: const Icon(LucideIcons.crop, size: 18, color: Color(0xFF2563EB)),
                 title: const Text('Crop Current Photo', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
                 onTap: () => _proceedToCrop(context, currentImageUrl!),
               ),

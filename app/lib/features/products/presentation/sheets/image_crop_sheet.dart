@@ -77,7 +77,7 @@ class _ImageCropSheetState extends State<ImageCropSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(LucideIcons.camera, color: Color(0xFF0066FF)),
+                leading: const Icon(LucideIcons.camera, color: Color(0xFF2563EB)),
                 title: const Text('Take New Photo', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
@@ -239,7 +239,7 @@ class _ImageCropSheetState extends State<ImageCropSheet> {
                   icon: const Icon(LucideIcons.camera, size: 14),
                   label: const Text('Change', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF0066FF),
+                    foregroundColor: const Color(0xFF2563EB),
                     backgroundColor: const Color(0xFFEFF6FF),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

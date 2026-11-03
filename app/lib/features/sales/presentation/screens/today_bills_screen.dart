@@ -424,9 +424,9 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: _isToday ? const Color(0xFFEFF6FF) : const Color(0xFFFEF3C7),
+                              color: _isToday ? const Color(0xFFEFF6FF) : const Color(0xFFFFFBEB),
                               border: Border.all(
-                                color: _isToday ? const Color(0xFFBFDBFE) : const Color(0xFFFDE68A),
+                                color: _isToday ? const Color(0xFFBFDBFE) : const Color(0xFFFCD34D),
                                 width: 1,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -437,7 +437,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                                 Icon(
                                   LucideIcons.calendar,
                                   size: 13,
-                                  color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFD97706),
+                                  color: _isToday ? const Color(0xFF2563EB) : const Color(0xFFD97706),
                                 ),
                                 const Gap(5),
                                 Text(
@@ -445,14 +445,14 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
-                                    color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFB45309),
+                                    color: _isToday ? const Color(0xFF2563EB) : const Color(0xFF92400E),
                                   ),
                                 ),
                                 const Gap(4),
                                 Icon(
                                   LucideIcons.chevronDown,
                                   size: 12,
-                                  color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFB45309),
+                                  color: _isToday ? const Color(0xFF2563EB) : const Color(0xFF92400E),
                                 ),
                               ],
                             ),
@@ -465,7 +465,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                   // Scrollable Bills List & Summaries with Drag-to-Refresh & Sliver Virtualization
                   Expanded(
                     child: RefreshIndicator(
-                      color: const Color(0xFF0066FF),
+                      color: const Color(0xFF2563EB),
                       backgroundColor: Colors.white,
                       onRefresh: () async {
                         if (_isToday) {
@@ -486,13 +486,13 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Clean Overview Card (Kirana Blue Modern Header)
+                                  // Clean Overview Card (Deep Navy to Royal Blue, Non-Neon)
                                   Container(
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [Color(0xFF0052CC), Color(0xFF0066FF)],
+                                        colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                       ),
@@ -543,21 +543,21 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                                         ),
                                         const Gap(10),
 
-                                        // Payment Mode Breakdown - Single clean inline bar
+                                        // Payment Mode Breakdown - Single clean inline bar with crisp non-neon values
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                           decoration: BoxDecoration(
-                                            color: Colors.black.withValues(alpha: 0.12),
+                                            color: Colors.black.withValues(alpha: 0.14),
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                                             children: [
-                                              _inlineStat('Cash', 'Rs. ${cashSales.toInt()}', const Color(0xFF86EFAC)),
+                                              _inlineStat('Cash', 'Rs. ${cashSales.toInt()}', Colors.white),
                                               Container(width: 1, height: 12, color: Colors.white24),
-                                              _inlineStat('QR', 'Rs. ${onlineSales.toInt()}', const Color(0xFFBAE6FD)),
+                                              _inlineStat('QR', 'Rs. ${onlineSales.toInt()}', Colors.white),
                                               Container(width: 1, height: 12, color: Colors.white24),
-                                              _inlineStat('Udhar', 'Rs. ${creditSales.toInt()}', const Color(0xFFFDE68A)),
+                                              _inlineStat('Udhar', 'Rs. ${creditSales.toInt()}', Colors.white),
                                             ],
                                           ),
                                         ),
@@ -579,9 +579,9 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFFEF3C7),
+                                          color: const Color(0xFFFFFBEB),
                                           borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: const Color(0xFFFDE68A)),
+                                          border: Border.all(color: const Color(0xFFFCD34D)),
                                         ),
                                         child: Row(
                                           children: [
@@ -767,7 +767,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                       style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -812,7 +812,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+          color: active ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

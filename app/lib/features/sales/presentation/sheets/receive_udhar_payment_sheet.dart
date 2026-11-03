@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/auth_text_field.dart';
@@ -124,7 +124,7 @@ class _ReceiveUdharPaymentSheetState extends State<ReceiveUdharPaymentSheet> {
                           _amountController.text = _amount.toInt().toString();
                         });
                       },
-                      child: const Text('Pay Full', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF0066FF))),
+                      child: const Text('Pay Full', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
                     ),
                   ],
                 ),
@@ -155,7 +155,7 @@ class _ReceiveUdharPaymentSheetState extends State<ReceiveUdharPaymentSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+                          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

@@ -268,7 +268,7 @@ class _POSMultiBarcodeScannerSheetState
                         style: const TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0866FF),
+                          color: Color(0xFF2563EB),
                         ),
                       ),
                     ],
@@ -316,7 +316,7 @@ class _POSMultiBarcodeScannerSheetState
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0866FF),
+                          backgroundColor: const Color(0xFF2563EB),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           elevation: 0,
@@ -474,7 +474,7 @@ class _POSMultiBarcodeScannerSheetState
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0866FF).withValues(alpha: 0.1),
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -482,7 +482,7 @@ class _POSMultiBarcodeScannerSheetState
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0866FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ),
@@ -541,7 +541,7 @@ class _POSMultiBarcodeScannerSheetState
                       height: 100,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: const Color(0xFF0866FF),
+                          color: const Color(0xFF2563EB),
                           width: 1.8,
                         ),
                         borderRadius: BorderRadius.circular(10),
@@ -671,7 +671,7 @@ class _POSMultiBarcodeScannerSheetState
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(color: Color(0xFF0866FF), width: 1.2),
+                            borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.2),
                           ),
                         ),
                       ),
@@ -683,7 +683,7 @@ class _POSMultiBarcodeScannerSheetState
                     child: ElevatedButton(
                       onPressed: _submitManual,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0866FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         elevation: 0,
@@ -846,7 +846,7 @@ class _POSMultiBarcodeScannerSheetState
                                     style: const TextStyle(
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w800,
-                                      color: Color(0xFF0866FF),
+                                      color: Color(0xFF2563EB),
                                     ),
                                   ),
                                   InkWell(
@@ -934,7 +934,7 @@ class _POSMultiBarcodeScannerSheetState
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0866FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         elevation: 0,
                         shape: RoundedRectangleBorder(

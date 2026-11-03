@@ -179,7 +179,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       child: Container(
                         color: Colors.white,
                         child: RefreshIndicator(
-                          color: const Color(0xFF0066FF),
+                          color: const Color(0xFF2563EB),
                           backgroundColor: Colors.white,
                           onRefresh: () async {
                             await AppDataRepository.instance.refreshAll(force: true);

@@ -71,10 +71,10 @@ class CustomerLedgerFilterSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: isChosen ? FontWeight.w700 : FontWeight.w500,
-                    color: isChosen ? const Color(0xFF0066FF) : colors.darkText,
+                    color: isChosen ? const Color(0xFF2563EB) : colors.darkText,
                   ),
                 ),
-                trailing: isChosen ? const Icon(Icons.check, color: Color(0xFF0066FF), size: 18) : null,
+                trailing: isChosen ? const Icon(Icons.check, color: Color(0xFF2563EB), size: 18) : null,
                 onTap: () => Navigator.pop(context, opt.$1),
               );
             }),

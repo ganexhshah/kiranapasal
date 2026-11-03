@@ -190,7 +190,7 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
                         child: Container(
                           width: 190,
                           height: 2,
-                          color: const Color(0xFF38BDF8),
+                          color: const Color(0xFF2563EB),
                         ),
                       ),
 

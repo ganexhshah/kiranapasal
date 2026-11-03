@@ -103,7 +103,7 @@ class CustomerActionsSheet extends StatelessWidget {
                     backgroundColor: const Color(0xFFEFF6FF),
                     child: Text(
                       customer.name.isNotEmpty ? customer.name[0].toUpperCase() : 'C',
-                      style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF0066FF)),
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF2563EB)),
                     ),
                   ),
                   const Gap(12),
@@ -137,7 +137,7 @@ class CustomerActionsSheet extends StatelessWidget {
             _actionTile(
               context: context,
               icon: LucideIcons.bookOpen,
-              iconColor: const Color(0xFF0066FF),
+              iconColor: const Color(0xFF2563EB),
               title: 'View Udhar Ledger',
               onTap: () => Navigator.pop(context, CustomerActionType.viewLedger),
             ),

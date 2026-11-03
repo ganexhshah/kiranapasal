@@ -100,13 +100,13 @@ class _SelectCustomerSheetState extends State<SelectCustomerSheet> {
                 ),
                 TextButton.icon(
                   onPressed: _addNewCustomer,
-                  icon: const Icon(LucideIcons.userPlus, size: 15, color: Color(0xFF0066FF)),
+                  icon: const Icon(LucideIcons.userPlus, size: 15, color: Color(0xFF2563EB)),
                   label: const Text(
                     'Add Customer',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0066FF),
+                      color: Color(0xFF2563EB),
                     ),
                   ),
                 ),
@@ -153,7 +153,7 @@ class _SelectCustomerSheetState extends State<SelectCustomerSheet> {
                         color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10),
                         border: isSelected
-                            ? Border.all(color: const Color(0xFF0066FF), width: 1.2)
+                            ? Border.all(color: const Color(0xFF2563EB), width: 1.2)
                             : null,
                       ),
                       child: Row(
@@ -163,7 +163,7 @@ class _SelectCustomerSheetState extends State<SelectCustomerSheet> {
                             height: 36,
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? const Color(0xFF0066FF)
+                                  ? const Color(0xFF2563EB)
                                   : const Color(0xFFE2E8F0),
                               shape: BoxShape.circle,
                             ),

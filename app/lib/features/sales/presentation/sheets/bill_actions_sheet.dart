@@ -98,7 +98,7 @@ class BillActionsSheet extends StatelessWidget {
                   ),
                   Text(
                     'Rs. ${amount.toInt()}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0066FF)),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF2563EB)),
                   ),
                 ],
               ),
@@ -107,7 +107,7 @@ class BillActionsSheet extends StatelessWidget {
             _actionTile(
               context: context,
               icon: LucideIcons.eye,
-              iconColor: const Color(0xFF0066FF),
+              iconColor: const Color(0xFF2563EB),
               title: 'View Full Invoice',
               onTap: () => Navigator.pop(context, BillActionType.view),
             ),

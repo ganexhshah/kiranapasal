@@ -189,7 +189,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0066FF), elevation: 0),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), elevation: 0),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: msg));
               Navigator.pop(ctx);
@@ -430,7 +430,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
           children: [
             Expanded(
               child: RefreshIndicator(
-                color: const Color(0xFF0066FF),
+                color: const Color(0xFF2563EB),
                 backgroundColor: Colors.white,
                 onRefresh: () async {
                   await AppDataRepository.instance.refreshAll();
@@ -503,7 +503,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: _isCustomer ? const Color(0xFF0066FF) : const Color(0xFF7C3AED),
+                    color: _isCustomer ? const Color(0xFF2563EB) : const Color(0xFF7C3AED),
                   ),
                 ),
               ),
@@ -584,7 +584,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)),
-                      child: Text('Limit: Rs. ${limit.toInt()}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF0066FF))),
+                      child: Text('Limit: Rs. ${limit.toInt()}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
                     ),
                   ),
               ],
@@ -596,7 +596,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
           // Clean Lineless Action Pills
           Row(
             children: [
-              _actionPill(LucideIcons.copy, 'Copy No.', const Color(0xFF0066FF), _callPhone),
+              _actionPill(LucideIcons.copy, 'Copy No.', const Color(0xFF2563EB), _callPhone),
               const Gap(8),
               _actionPill(LucideIcons.messageCircle, 'WhatsApp', const Color(0xFF16A34A), () => _shareReminder(true)),
               const Gap(8),
@@ -686,7 +686,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
                 child: LinearProgressIndicator(
                   value: pct,
                   minHeight: 5,
-                  backgroundColor: hasUdhar ? const Color(0xFFFCA5A5).withValues(alpha: 0.3) : const Color(0xFF86EFAC).withValues(alpha: 0.3),
+                  backgroundColor: hasUdhar ? const Color(0xFFFCA5A5).withValues(alpha: 0.3) : const Color(0xFFBBF7D0).withValues(alpha: 0.3),
                   valueColor: AlwaysStoppedAnimation<Color>(pct > 0.8 ? const Color(0xFFDC2626) : const Color(0xFF2563EB)),
                 ),
               ),
@@ -730,7 +730,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
                   ),
                   child: Text(
                     hasPayable ? 'Payable' : 'Zero',
-                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: hasPayable ? const Color(0xFF0066FF) : const Color(0xFF16A34A)),
+                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: hasPayable ? const Color(0xFF2563EB) : const Color(0xFF16A34A)),
                   ),
                 ),
               ],
@@ -741,7 +741,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: hasPayable ? const Color(0xFF0066FF) : const Color(0xFF16A34A),
+                color: hasPayable ? const Color(0xFF2563EB) : const Color(0xFF16A34A),
                 letterSpacing: -0.5,
               ),
             ),
@@ -773,7 +773,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
             ),
             InkWell(
               onTap: _shareStatement,
-              child: const Text('Export PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0066FF))),
+              child: const Text('Export PDF', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF2563EB))),
             ),
           ],
         ),
@@ -856,7 +856,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+          color: active ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -1064,7 +1064,7 @@ class _PartyDetailsScreenState extends State<PartyDetailsScreen> {
                   flex: 3,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

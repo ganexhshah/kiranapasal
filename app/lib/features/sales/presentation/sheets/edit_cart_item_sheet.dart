@@ -187,14 +187,14 @@ class _EditCartItemSheetState extends State<EditCartItemSheet> {
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0066FF),
+                              color: Color(0xFF2563EB),
                             ),
                           ),
                           const Gap(4),
                           const Icon(
                             LucideIcons.chevronDown,
                             size: 14,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ],
                       ),
@@ -299,7 +299,7 @@ class _EditCartItemSheetState extends State<EditCartItemSheet> {
                           style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ],
@@ -315,7 +315,7 @@ class _EditCartItemSheetState extends State<EditCartItemSheet> {
                       Navigator.pop(context, updated);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),

@@ -141,7 +141,7 @@ class _RecordPurchaseSheetState extends State<RecordPurchaseSheet> {
                           Text(_supplier?.name ?? 'Select Supplier', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: colors.darkText)),
                         ],
                       ),
-                      const Icon(Icons.arrow_drop_down, color: Color(0xFF0066FF)),
+                      const Icon(Icons.arrow_drop_down, color: Color(0xFF2563EB)),
                     ],
                   ),
                 ),
@@ -219,7 +219,7 @@ class _RecordPurchaseSheetState extends State<RecordPurchaseSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total Shipment Cost', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                    Text('Rs. ${_total.toInt()}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF0066FF))),
+                    Text('Rs. ${_total.toInt()}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF2563EB))),
                   ],
                 ),
               ),
@@ -245,7 +245,7 @@ class _RecordPurchaseSheetState extends State<RecordPurchaseSheet> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

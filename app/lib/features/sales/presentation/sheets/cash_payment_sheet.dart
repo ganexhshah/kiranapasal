@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../../../core/theme/theme.dart';
 
@@ -134,7 +134,7 @@ class _CashPaymentSheetState extends State<CashPaymentSheet> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF0066FF),
+                        color: Color(0xFF2563EB),
                       ),
                     ),
                   ],
@@ -158,7 +158,7 @@ class _CashPaymentSheetState extends State<CashPaymentSheet> {
                   color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFF0066FF).withValues(alpha: 0.4),
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.4),
                   ),
                 ),
                 child: TextField(

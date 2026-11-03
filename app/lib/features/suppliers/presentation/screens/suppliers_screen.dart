@@ -193,7 +193,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
                       style:
                           TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding:
@@ -262,7 +262,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
               const Gap(8),
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
+                  color: const Color(0xFF2563EB),
                   backgroundColor: Colors.white,
                   onRefresh: () async {
                     await AppDataRepository.instance.refreshAll();
@@ -330,7 +330,7 @@ class _SuppliersScreenState extends State<SuppliersScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color:
-              isSelected ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+              isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

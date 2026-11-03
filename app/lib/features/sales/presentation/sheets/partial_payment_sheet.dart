@@ -82,7 +82,7 @@ class _PartialPaymentSheetState extends State<PartialPaymentSheet> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0866FF) : const Color(0xFFF1F5F9),
+            color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
@@ -157,7 +157,7 @@ class _PartialPaymentSheetState extends State<PartialPaymentSheet> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Total Bill Amount', style: TextStyle(fontSize: 12.5, color: colors.inputLabel)),
-                        Text('Rs. ${widget.totalAmount.toInt()}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0866FF))),
+                        Text('Rs. ${widget.totalAmount.toInt()}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF2563EB))),
                       ],
                     ),
                   ],
@@ -175,7 +175,7 @@ class _PartialPaymentSheetState extends State<PartialPaymentSheet> {
                   ),
                   Text(
                     'Total: Rs. ${widget.totalAmount.toInt()}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0866FF)),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF2563EB)),
                   ),
                 ],
               ),
@@ -254,7 +254,7 @@ class _PartialPaymentSheetState extends State<PartialPaymentSheet> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0866FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

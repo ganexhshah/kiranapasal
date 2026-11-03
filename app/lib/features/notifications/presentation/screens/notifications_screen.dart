@@ -150,7 +150,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
       case NotificationCategory.stock:
         return (LucideIcons.alertTriangle, const Color(0xFFEF4444));
       case NotificationCategory.sales:
-        return (LucideIcons.wallet, const Color(0xFF0066FF));
+        return (LucideIcons.wallet, const Color(0xFF2563EB));
       case NotificationCategory.system:
         return (LucideIcons.bellRing, const Color(0xFF7C3AED));
     }
@@ -200,7 +200,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0066FF),
+                          color: const Color(0xFF2563EB),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -217,13 +217,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                     if (_unreadCount > 0)
                       TextButton.icon(
                         onPressed: _markAllAsRead,
-                        icon: const Icon(LucideIcons.checkCheck, size: 14, color: Color(0xFF0066FF)),
+                        icon: const Icon(LucideIcons.checkCheck, size: 14, color: Color(0xFF2563EB)),
                         label: const Text(
                           'Mark all read',
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                         style: TextButton.styleFrom(
@@ -245,7 +245,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                   tabAlignment: TabAlignment.start,
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicator: BoxDecoration(
-                    color: const Color(0xFF0066FF),
+                    color: const Color(0xFF2563EB),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   dividerColor: Colors.transparent,
@@ -268,7 +268,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                     final items = _getFilteredNotifications(tabIndex);
 
                     return RefreshIndicator(
-                      color: const Color(0xFF0066FF),
+                      color: const Color(0xFF2563EB),
                       backgroundColor: Colors.white,
                       onRefresh: () async {
                         await AppDataRepository.instance.refreshAll();
@@ -429,7 +429,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                                                 style: const TextStyle(
                                                   fontSize: 11.5,
                                                   fontWeight: FontWeight.w700,
-                                                  color: Color(0xFF0066FF),
+                                                  color: Color(0xFF2563EB),
                                                 ),
                                               ),
                                             ),
@@ -445,7 +445,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> with SingleTi
                                       height: 8,
                                       margin: const EdgeInsets.only(top: 4),
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFF0066FF),
+                                        color: Color(0xFF2563EB),
                                         shape: BoxShape.circle,
                                       ),
                                     ),

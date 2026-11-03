@@ -259,7 +259,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   // 4. Products Grid with Pull-to-Refresh & Shimmer Skeletons
                   Expanded(
                     child: RefreshIndicator(
-                      color: const Color(0xFF0066FF),
+                      color: const Color(0xFF2563EB),
                       backgroundColor: Colors.white,
                       onRefresh: () async {
                         await AppDataRepository.instance.refreshAll();

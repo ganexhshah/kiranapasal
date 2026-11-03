@@ -71,7 +71,7 @@ class AppEmptyState extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0066FF),
+                    color: Color(0xFF2563EB),
                   ),
                 ),
               ),

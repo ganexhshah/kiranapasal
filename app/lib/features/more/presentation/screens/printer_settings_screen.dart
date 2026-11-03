@@ -187,8 +187,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                             : const Icon(LucideIcons.playCircle, size: 16),
                         label: Text(_isTesting ? 'Printing...' : 'Test Print'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF0284C7),
-                          side: const BorderSide(color: Color(0xFFBAE6FD)),
+                          foregroundColor: const Color(0xFF2563EB),
+                          side: const BorderSide(color: Color(0xFFBFDBFE)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       ),

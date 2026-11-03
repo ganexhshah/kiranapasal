@@ -100,7 +100,7 @@ class _DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0066FF),
+                  color: Color(0xFF2563EB),
                 ),
               ),
             ),
@@ -127,7 +127,7 @@ class _DeleteConfirmationSheetState extends State<DeleteConfirmationSheet> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
+                  border: Border.all(color: const Color(0xFFFCD34D)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

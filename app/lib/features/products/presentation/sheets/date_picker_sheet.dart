@@ -160,7 +160,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
                     child: const Center(
                       child: Icon(
                         LucideIcons.calendar,
-                        color: Color(0xFF0866FF),
+                        color: Color(0xFF2563EB),
                         size: 18,
                       ),
                     ),
@@ -271,7 +271,7 @@ class _DatePickerSheetState extends State<DatePickerSheet> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context, _selectedDate),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(

@@ -314,9 +314,9 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                 Container(
                   color: Colors.white,
                   child: const TabBar(
-                    indicatorColor: Color(0xFF0866FF),
+                    indicatorColor: Color(0xFF2563EB),
                     indicatorWeight: 3,
-                    labelColor: Color(0xFF0866FF),
+                    labelColor: Color(0xFF2563EB),
                     unselectedLabelColor: Color(0xFF64748B),
                     labelStyle: TextStyle(
                       fontSize: 13,
@@ -407,7 +407,7 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                             style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0866FF),
+                            backgroundColor: const Color(0xFF2563EB),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             elevation: 0,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1115,7 +1115,7 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                 ),
                 if (widget.customerPhone.isNotEmpty) ...[
                   IconButton(
-                    icon: const Icon(LucideIcons.phone, size: 16, color: Color(0xFF0866FF)),
+                    icon: const Icon(LucideIcons.phone, size: 16, color: Color(0xFF2563EB)),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Calling ${widget.customerPhone}...')),
@@ -1356,7 +1356,7 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
                                           ? LucideIcons.clock
                                           : LucideIcons.creditCard,
                               size: 14,
-                              color: const Color(0xFF0866FF),
+                              color: const Color(0xFF2563EB),
                             ),
                             const Gap(6),
                             Text(

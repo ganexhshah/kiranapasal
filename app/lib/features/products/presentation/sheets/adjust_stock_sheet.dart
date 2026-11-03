@@ -188,7 +188,7 @@ class _AdjustStockSheetState extends State<AdjustStockSheet> {
                           Icon(
                             isSelected ? LucideIcons.checkCircle2 : LucideIcons.circle,
                             size: 18,
-                            color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF94A3B8),
+                            color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
                           ),
                           const Gap(12),
                           Expanded(
@@ -197,7 +197,7 @@ class _AdjustStockSheetState extends State<AdjustStockSheet> {
                               style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF0F172A),
+                                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
                               ),
                             ),
                           ),
@@ -622,7 +622,7 @@ class _AdjustStockSheetState extends State<AdjustStockSheet> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isAddition ? const Color(0xFF0066FF) : const Color(0xFFEF4444),
+                    backgroundColor: _isAddition ? const Color(0xFF2563EB) : const Color(0xFFEF4444),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

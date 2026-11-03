@@ -165,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Container(
                     color: Colors.white,
                     child: RefreshIndicator(
-                      color: const Color(0xFF0066FF),
+                      color: const Color(0xFF2563EB),
                       backgroundColor: Colors.white,
                       onRefresh: () async {
                         await Future.wait([
@@ -217,10 +217,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               title: t.title,
                               subtitle: '${DateFormat('h:mm a').format(t.timestamp)} | ${t.paymentMethod}',
                               amount: '${t.isInflow ? '+' : '-'} Rs. ${t.amount.toStringAsFixed(2)}',
-                              amountColor: t.isInflow ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                              amountColor: t.isInflow ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
                               icon: isSale ? LucideIcons.shoppingCart : (t.category == TransactionCategory.udharPayment ? LucideIcons.user : LucideIcons.package),
-                              iconColor: isSale ? const Color(0xFF10B981) : const Color(0xFF0866FF),
-                              iconBackgroundColor: isSale ? const Color(0xFFE6F8F0) : const Color(0xFFE8F1FF),
+                              iconColor: isSale ? const Color(0xFF16A34A) : const Color(0xFF2563EB),
+                              iconBackgroundColor: isSale ? const Color(0xFFF0FDF4) : const Color(0xFFEFF6FF),
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(

@@ -173,7 +173,7 @@ class _AddEditCustomerSheetState extends State<AddEditCustomerSheet> {
                     child: ElevatedButton(
                       onPressed: _save,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
+                        backgroundColor: const Color(0xFF2563EB),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),

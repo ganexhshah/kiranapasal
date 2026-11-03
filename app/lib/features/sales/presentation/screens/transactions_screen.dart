@@ -339,7 +339,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   // Scrollable Transactions Content with Drag-to-Refresh & Sliver Virtualization
                   Expanded(
                     child: RefreshIndicator(
-                      color: const Color(0xFF0066FF),
+                      color: const Color(0xFF2563EB),
                       backgroundColor: Colors.white,
                       onRefresh: () async {
                         await AppDataRepository.instance.refreshAll(force: true);
@@ -479,7 +479,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF0066FF),
+                                  color: Color(0xFF2563EB),
                                 ),
                               ),
                             ),
@@ -647,7 +647,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+          color: active ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -680,7 +680,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final Color iconColor = isSale
         ? const Color(0xFF10B981)
         : isUdharPayment
-            ? const Color(0xFF0866FF)
+            ? const Color(0xFF2563EB)
             : isCredit
                 ? const Color(0xFFF59E0B)
                 : const Color(0xFF64748B);
@@ -782,10 +782,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   children: [
                     Text(
                       'Details',
-                      style: TextStyle(fontSize: 10.5, color: Color(0xFF0066FF), fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 10.5, color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
                     ),
                     Gap(2),
-                    Icon(LucideIcons.chevronRight, size: 12, color: Color(0xFF0066FF)),
+                    Icon(LucideIcons.chevronRight, size: 12, color: Color(0xFF2563EB)),
                   ],
                 ),
               ],

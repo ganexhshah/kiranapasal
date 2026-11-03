@@ -133,7 +133,7 @@ class _PurchasePaymentSheetState extends State<PurchasePaymentSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+                          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

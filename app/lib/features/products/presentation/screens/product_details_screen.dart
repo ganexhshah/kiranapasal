@@ -337,7 +337,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // 2. Scrollable Body with Drag-to-Refresh
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
+                  color: const Color(0xFF2563EB),
                   backgroundColor: Colors.white,
                   onRefresh: () async {
                     await AppDataRepository.instance.refreshAll();
@@ -421,13 +421,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           // "Edit" Pill Button (borderless)
           TextButton.icon(
             onPressed: _openEditProductSheet,
-            icon: const Icon(LucideIcons.pencil, size: 13, color: Color(0xFF0066FF)),
+            icon: const Icon(LucideIcons.pencil, size: 13, color: Color(0xFF2563EB)),
             label: const Text(
               'Edit',
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF0066FF),
+                color: Color(0xFF2563EB),
               ),
             ),
             style: TextButton.styleFrom(
@@ -494,7 +494,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
                             border: _selectedImageIndex == i
-                                ? Border.all(color: const Color(0xFF0066FF), width: 1.5)
+                                ? Border.all(color: const Color(0xFF2563EB), width: 1.5)
                                 : null,
                           ),
                           child: ProductThumbnail(
@@ -959,13 +959,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             height: 38,
             child: TextButton.icon(
               onPressed: () => _openAddEditSellingUnitSheet(),
-              icon: const Icon(LucideIcons.plus, size: 14, color: Color(0xFF0066FF)),
+              icon: const Icon(LucideIcons.plus, size: 14, color: Color(0xFF2563EB)),
               label: const Text(
                 'Add Selling Unit',
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0066FF),
+                  color: Color(0xFF2563EB),
                 ),
               ),
               style: TextButton.styleFrom(
@@ -1155,7 +1155,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0066FF),
+                    color: Color(0xFF2563EB),
                   ),
                 ),
               ),
@@ -1325,7 +1325,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0066FF),
+                backgroundColor: const Color(0xFF2563EB),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(

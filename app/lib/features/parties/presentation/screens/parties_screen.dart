@@ -107,7 +107,7 @@ class _PartiesScreenState extends State<PartiesScreen> {
                     color: const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(LucideIcons.userPlus, size: 20, color: Color(0xFF0066FF)),
+                  child: const Icon(LucideIcons.userPlus, size: 20, color: Color(0xFF2563EB)),
                 ),
                 title: Text(
                   'Add Customer',
@@ -220,7 +220,7 @@ class _PartiesScreenState extends State<PartiesScreen> {
                     color: const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(LucideIcons.userPlus, size: 18, color: Color(0xFF0066FF)),
+                  child: const Icon(LucideIcons.userPlus, size: 18, color: Color(0xFF2563EB)),
                 ),
                 title: const Text('Add New Customer', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 onTap: () {
@@ -757,7 +757,7 @@ class _PartiesScreenState extends State<PartiesScreen> {
               // 3. Unified Parties List with Pull-to-Refresh & Shimmer Skeletons
               Expanded(
                 child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
+                  color: const Color(0xFF2563EB),
                   backgroundColor: Colors.white,
                   onRefresh: () async {
                     await AppDataRepository.instance.refreshAll();
@@ -850,7 +850,7 @@ class _PartiesScreenState extends State<PartiesScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF1F5F9),
+          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

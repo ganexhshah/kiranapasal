@@ -280,7 +280,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                       color: const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(LucideIcons.info, size: 16, color: Color(0xFF0066FF)),
+                    child: const Icon(LucideIcons.info, size: 16, color: Color(0xFF2563EB)),
                   ),
                   const Gap(10),
                   Text(
@@ -336,7 +336,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ],
@@ -351,7 +351,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(ctx),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -369,7 +369,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
   Widget _breakdownRow(String label, String value, {bool isGreen = false, bool isBlue = false, bool isAmber = false}) {
     Color color = context.colors.darkText;
     if (isGreen) color = const Color(0xFF16A34A);
-    if (isBlue) color = const Color(0xFF0066FF);
+    if (isBlue) color = const Color(0xFF2563EB);
     if (isAmber) color = const Color(0xFFD97706);
 
     return Row(
@@ -555,7 +555,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                         Icon(
                           _customer.isWalkIn ? LucideIcons.userCheck : LucideIcons.user,
                           size: 14,
-                          color: const Color(0xFF0066FF),
+                          color: const Color(0xFF2563EB),
                         ),
                         const Gap(6),
                         Text(
@@ -563,7 +563,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ],
@@ -597,13 +597,13 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                 ),
                 TextButton.icon(
                   onPressed: _addNewItem,
-                  icon: const Icon(LucideIcons.plus, size: 14, color: Color(0xFF0066FF)),
+                  icon: const Icon(LucideIcons.plus, size: 14, color: Color(0xFF2563EB)),
                   label: const Text(
                     'Add Item',
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0066FF),
+                      color: Color(0xFF2563EB),
                     ),
                   ),
                   style: TextButton.styleFrom(
@@ -666,7 +666,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF0066FF),
+                              color: Color(0xFF2563EB),
                             ),
                           ),
                           const Gap(8),
@@ -758,7 +758,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                           Icon(
                             LucideIcons.receipt,
                             size: 13,
-                            color: _effectiveTax > 0 ? const Color(0xFF0066FF) : colors.darkText,
+                            color: _effectiveTax > 0 ? const Color(0xFF2563EB) : colors.darkText,
                           ),
                           const Gap(6),
                           Flexible(
@@ -771,7 +771,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: _effectiveTax > 0 ? const Color(0xFF0066FF) : colors.darkText,
+                                color: _effectiveTax > 0 ? const Color(0xFF2563EB) : colors.darkText,
                               ),
                             ),
                           ),
@@ -844,7 +844,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                           Icon(
                             LucideIcons.fileText,
                             size: 13,
-                            color: _saleNote.isNotEmpty ? const Color(0xFF0066FF) : colors.darkText,
+                            color: _saleNote.isNotEmpty ? const Color(0xFF2563EB) : colors.darkText,
                           ),
                           const Gap(6),
                           Flexible(
@@ -855,7 +855,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: _saleNote.isNotEmpty ? const Color(0xFF0066FF) : colors.darkText,
+                                color: _saleNote.isNotEmpty ? const Color(0xFF2563EB) : colors.darkText,
                               ),
                             ),
                           ),
@@ -891,7 +891,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                               child: Icon(
                                 LucideIcons.info,
                                 size: 14,
-                                color: Color(0xFF0066FF),
+                                color: Color(0xFF2563EB),
                               ),
                             ),
                           ),
@@ -902,7 +902,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0066FF),
+                          color: Color(0xFF2563EB),
                         ),
                       ),
                     ],
@@ -929,7 +929,7 @@ class _CheckoutSheetState extends State<CheckoutSheet> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1032,7 +1032,7 @@ class _QuickProductPickerSheetState extends State<_QuickProductPickerSheet> {
                               ],
                             ),
                           ),
-                          const Icon(LucideIcons.plus, size: 18, color: Color(0xFF0066FF)),
+                          const Icon(LucideIcons.plus, size: 18, color: Color(0xFF2563EB)),
                         ],
                       ),
                     ),

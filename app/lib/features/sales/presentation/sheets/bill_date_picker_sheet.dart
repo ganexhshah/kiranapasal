@@ -107,7 +107,7 @@ class BillDatePickerSheet extends StatelessWidget {
                       color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF0066FF) : Colors.transparent,
+                        color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
                         width: 1.5,
                       ),
                     ),
@@ -119,7 +119,7 @@ class BillDatePickerSheet extends StatelessWidget {
                             Icon(
                               LucideIcons.calendar,
                               size: 16,
-                              color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF64748B),
+                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                             ),
                             const Gap(10),
                             Column(
@@ -130,7 +130,7 @@ class BillDatePickerSheet extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF0F172A),
+                                    color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
                                   ),
                                 ),
                                 Text(
@@ -148,7 +148,7 @@ class BillDatePickerSheet extends StatelessWidget {
                           const Icon(
                             LucideIcons.check,
                             size: 18,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                       ],
                     ),
@@ -171,7 +171,7 @@ class BillDatePickerSheet extends StatelessWidget {
                     return Theme(
                       data: Theme.of(context).copyWith(
                         colorScheme: const ColorScheme.light(
-                          primary: Color(0xFF0066FF),
+                          primary: Color(0xFF2563EB),
                           onPrimary: Colors.white,
                           onSurface: Color(0xFF0F172A),
                         ),
@@ -197,14 +197,14 @@ class BillDatePickerSheet extends StatelessWidget {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(LucideIcons.calendarDays, size: 16, color: Color(0xFF0066FF)),
+                    Icon(LucideIcons.calendarDays, size: 16, color: Color(0xFF2563EB)),
                     Gap(8),
                     Text(
                       'Choose Custom Date from Calendar',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0066FF),
+                        color: Color(0xFF2563EB),
                       ),
                     ),
                   ],
@@ -217,3 +217,4 @@ class BillDatePickerSheet extends StatelessWidget {
     );
   }
 }
+

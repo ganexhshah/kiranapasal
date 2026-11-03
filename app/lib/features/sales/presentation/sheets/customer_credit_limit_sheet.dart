@@ -98,7 +98,7 @@ class _CustomerCreditLimitSheetState extends State<CustomerCreditLimitSheet> {
                     Navigator.pop(context, val);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0066FF),
+                    backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

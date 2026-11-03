@@ -90,7 +90,7 @@ class _SalesFilterSheetState extends State<SalesFilterSheet> {
                   label: Text(p),
                   selected: isSelected,
                   onSelected: (_) => setState(() => _datePeriod = p),
-                  selectedColor: const Color(0xFF0066FF),
+                  selectedColor: const Color(0xFF2563EB),
                   labelStyle: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -114,7 +114,7 @@ class _SalesFilterSheetState extends State<SalesFilterSheet> {
                   label: Text(m),
                   selected: isSelected,
                   onSelected: (_) => setState(() => _paymentMethod = m),
-                  selectedColor: const Color(0xFF0066FF),
+                  selectedColor: const Color(0xFF2563EB),
                   labelStyle: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -142,7 +142,7 @@ class _SalesFilterSheetState extends State<SalesFilterSheet> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0066FF),
+                  backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

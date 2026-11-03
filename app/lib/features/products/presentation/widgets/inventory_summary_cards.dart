@@ -28,7 +28,7 @@ class InventorySummaryCards extends StatelessWidget {
             title: 'Total Products',
             value: totalProducts,
             icon: LucideIcons.package,
-            iconColor: const Color(0xFF0866FF),
+            iconColor: const Color(0xFF2563EB),
             iconBackgroundColor: const Color(0xFFE8F1FF),
             onTap: onTotalProductsTap,
           ),

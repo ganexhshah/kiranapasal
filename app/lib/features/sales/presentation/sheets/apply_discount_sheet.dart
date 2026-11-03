@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../../../core/theme/theme.dart';
 
@@ -132,7 +132,7 @@ class _ApplyDiscountSheetState extends State<ApplyDiscountSheet> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: _type == DiscountType.percentage ? FontWeight.w700 : FontWeight.w500,
-                              color: _type == DiscountType.percentage ? const Color(0xFF0066FF) : colors.inputLabel,
+                              color: _type == DiscountType.percentage ? const Color(0xFF2563EB) : colors.inputLabel,
                             ),
                           ),
                         ),
@@ -156,7 +156,7 @@ class _ApplyDiscountSheetState extends State<ApplyDiscountSheet> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: _type == DiscountType.fixed ? FontWeight.w700 : FontWeight.w500,
-                              color: _type == DiscountType.fixed ? const Color(0xFF0066FF) : colors.inputLabel,
+                              color: _type == DiscountType.fixed ? const Color(0xFF2563EB) : colors.inputLabel,
                             ),
                           ),
                         ),
@@ -261,7 +261,7 @@ class _ApplyDiscountSheetState extends State<ApplyDiscountSheet> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),

@@ -203,14 +203,14 @@ class _AddToSaleSheetState extends State<AddToSaleSheet> {
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0066FF),
+                                    color: Color(0xFF2563EB),
                                   ),
                                 ),
                                 const Gap(4),
                                 const Icon(
                                   LucideIcons.chevronDown,
                                   size: 14,
-                                  color: Color(0xFF0066FF),
+                                  color: Color(0xFF2563EB),
                                 ),
                               ],
                             ),
@@ -340,7 +340,7 @@ class _AddToSaleSheetState extends State<AddToSaleSheet> {
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF0066FF),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                       ],
@@ -366,7 +366,7 @@ class _AddToSaleSheetState extends State<AddToSaleSheet> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
+                      backgroundColor: const Color(0xFF2563EB),
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
                       shape: RoundedRectangleBorder(
