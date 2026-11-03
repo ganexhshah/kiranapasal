@@ -521,3 +521,4 @@ graph LR
 | **Shop Operation During Internet Outage** | App blocked / spinning loaders | **100% Fully Functional** (sales, bills, khata, printing) |
 | **Data Loss on Connection Drop** | In-flight requests could fail | **Zero Data Loss** (persisted in SQLite Outbox) |
 | **Receipt Generation** | Waiting for server response | **Instant** thermal printing on bill completion |
+

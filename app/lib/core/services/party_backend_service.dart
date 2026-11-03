@@ -1,3 +1,5 @@
+import '../../features/sales/domain/models/customer.dart';
+import '../../features/sales/domain/models/supplier.dart';
 import '../network/api_client.dart';
 import '../network/api_config.dart';
 import '../network/api_response.dart';
@@ -146,5 +148,29 @@ class PartyBackendService {
       body: body,
       fromData: (data) => data as Map<String, dynamic>,
     );
+  }
+
+  /// Convenience method to fetch customers domain list directly
+  Future<List<Customer>> fetchCustomers() async {
+    try {
+      final res = await getCustomers();
+      if (res.success && res.data != null) {
+        final list = (res.data!['data'] ?? res.data!['customers']) as List<dynamic>? ?? [];
+        return list.map((c) => Customer.fromJson(c as Map<String, dynamic>)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Convenience method to fetch suppliers domain list directly
+  Future<List<Supplier>> fetchSuppliers() async {
+    try {
+      final res = await getSuppliers();
+      if (res.success && res.data != null) {
+        final list = (res.data!['data'] ?? res.data!['suppliers']) as List<dynamic>? ?? [];
+        return list.map((s) => Supplier.fromJson(s as Map<String, dynamic>)).toList();
+      }
+    } catch (_) {}
+    return [];
   }
 }

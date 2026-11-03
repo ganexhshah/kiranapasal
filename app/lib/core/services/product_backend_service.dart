@@ -1,3 +1,4 @@
+import '../../features/products/domain/models/product.dart';
 import '../network/api_client.dart';
 import '../network/api_config.dart';
 import '../network/api_response.dart';
@@ -113,5 +114,17 @@ class ProductBackendService {
       '${ApiConfig.products}/$productId/stock-history',
       fromData: (data) => data as List<dynamic>,
     );
+  }
+
+  /// Convenience method to fetch product domain list directly
+  Future<List<Product>> fetchProducts() async {
+    try {
+      final res = await getProducts();
+      if (res.success && res.data != null) {
+        final data = res.data!['data'] as List<dynamic>? ?? [];
+        return data.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
+      }
+    } catch (_) {}
+    return [];
   }
 }
