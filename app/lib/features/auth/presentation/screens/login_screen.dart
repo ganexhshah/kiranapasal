@@ -31,6 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _isGoogleLoading = false;
 
+  bool get _isLocked => _isLoading || _isGoogleLoading;
+
   @override
   void dispose() {
     _phoneController.dispose();
@@ -40,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _openCountryPicker() async {
+    if (_isLocked) return;
     final selected = await CountryPickerSheet.show(
       context,
       selectedDialCode: _selectedCountryCode,
@@ -50,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openForgotPassword() {
+    if (_isLocked) return;
     ForgotPasswordSheet.show(
       context,
       initialEmail: _isEmailMode ? _emailController.text : '',
@@ -57,94 +61,213 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+    if (_isLocked) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
 
-    final identifier = _isEmailMode
-        ? _emailController.text.trim()
-        : '$_selectedCountryCode ${_phoneController.text.trim()}';
+    try {
+      final identifier = _isEmailMode
+          ? _emailController.text.trim()
+          : '$_selectedCountryCode ${_phoneController.text.trim()}';
 
-    final res = await AuthService().login(
-      identifier: identifier,
-      password: _passwordController.text,
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (res.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(res.message.isNotEmpty ? res.message : 'Login successful!'),
-          backgroundColor: const Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(res.message.isNotEmpty ? res.message : 'Invalid credentials. Please try again.'),
-          backgroundColor: const Color(0xFFEF4444),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-    final res = await AuthService().loginWithGoogle();
-    if (!mounted) return;
-    setState(() => _isGoogleLoading = false);
-
-    if (res.success) {
-      final isNewUser = res.data?['is_new_user'] == true;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(res.message.isNotEmpty ? res.message : 'Google login successful!'),
-          backgroundColor: const Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
+      final res = await AuthService().login(
+        identifier: identifier,
+        password: _passwordController.text,
       );
 
-      if (isNewUser) {
-        // First-time user signing in through Google -> Navigate to Shop Onboarding!
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const ShopOnboardingScreen(),
+      if (!mounted) return;
+
+      if (res.success) {
+        final userName = res.data?['user']?['name'] ?? res.data?['shop']?['name'];
+        final welcomeMsg = userName != null && userName.toString().trim().isNotEmpty
+            ? 'Welcome back, $userName!'
+            : (res.message.isNotEmpty ? res.message : 'Login successful!');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    welcomeMsg,
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 3),
           ),
         );
-      } else {
-        // Returning user -> Navigate straight to Dashboard
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const DashboardScreen(),
           ),
         );
-      }
-    } else {
-      // A cancelled sign-in is not an error: detect it by meaning rather than
-      // by comparing one exact sentence, which breaks as soon as the copy moves.
-      final cancelled = res.message.toLowerCase().contains('cancel');
-      if (!cancelled) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              res.message.isNotEmpty
-                  ? res.message
-                  : "Google sign-in didn't work. Please try again.",
+            content: Row(
+              children: [
+                const Icon(LucideIcons.alertCircle, color: Colors.white, size: 20),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    res.message.isNotEmpty ? res.message : 'Invalid credentials. Please try again.',
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 4),
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    if (_isLocked) return;
+
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final res = await AuthService().loginWithGoogle();
+      if (!mounted) return;
+
+      if (res.success) {
+        final isNewUser = res.data?['is_new_user'] == true;
+        final user = res.data?['user'] as Map<String, dynamic>?;
+        final shop = res.data?['shop'] as Map<String, dynamic>?;
+        final name = (user?['name'] ?? shop?['name'] ?? '').toString().trim();
+
+        final welcomeMsg = name.isNotEmpty
+            ? 'Welcome, $name! Successfully logged in with Google.'
+            : 'Welcome back! Successfully logged in with Google.';
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    welcomeMsg,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        if (isNewUser) {
+          // First-time user signing in through Google -> Navigate to Shop Onboarding
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const ShopOnboardingScreen(),
+            ),
+          );
+        } else {
+          // Returning user -> Navigate straight to Dashboard
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const DashboardScreen(),
+            ),
+          );
+        }
+      } else {
+        final isCancelled = res.message.toLowerCase().contains('cancel');
+        final errorMsg = isCancelled
+            ? 'Google sign-in was cancelled.'
+            : (res.message.isNotEmpty
+                ? res.message
+                : 'Unable to sign in with Google. Please try again or use your password.');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(
+                  isCancelled ? LucideIcons.info : LucideIcons.alertCircle,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    errorMsg,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: isCancelled ? const Color(0xFF475569) : const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(LucideIcons.alertCircle, color: Colors.white, size: 20),
+              Gap(10),
+              Expanded(
+                child: Text(
+                  'Unable to complete Google sign-in. Please try again.',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -159,8 +282,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Form(
-              key: _formKey,
+            child: AbsorbPointer(
+              absorbing: _isLocked,
+              child: Form(
+                key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -379,7 +504,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   AppPrimaryButton(
                     text: 'Login',
                     isLoading: _isLoading,
-                    onPressed: _handleLogin,
+                    onPressed: _isLocked ? null : _handleLogin,
                   ),
                   const Gap(20),
 
@@ -416,19 +541,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Continue with Google Button (using official Google SVG from svgl.app)
                   AppOutlinedButton(
-                    text: _isGoogleLoading ? 'Connecting to Google...' : 'Continue with Google',
-                    icon: _isGoogleLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : SvgPicture.asset(
-                            'assets/icons/google.svg',
-                            width: 20,
-                            height: 20,
-                          ),
-                    onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
+                    text: 'Continue with Google',
+                    isLoading: _isGoogleLoading,
+                    icon: SvgPicture.asset(
+                      'assets/icons/google.svg',
+                      width: 20,
+                      height: 20,
+                    ),
+                    onPressed: _isLocked ? null : _handleGoogleSignIn,
                   ),
                   const Gap(28),
 
@@ -447,13 +567,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const RegisterScreen(),
-                              ),
-                            );
-                          },
+                          onTap: _isLocked
+                              ? null
+                              : () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const RegisterScreen(),
+                                    ),
+                                  );
+                                },
                           borderRadius: BorderRadius.circular(4),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
@@ -473,6 +595,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Gap(16),
                 ],
               ),
+            ),
             ),
           ),
         ),

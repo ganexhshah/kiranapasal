@@ -43,8 +43,8 @@ class AppOutlinedButton extends StatelessWidget {
         ),
         child: isLoading
             ? SizedBox(
-                width: 18,
-                height: 18,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(effectiveTextColor),

@@ -214,13 +214,33 @@ class AuthService {
       }
       return ApiResponse<Map<String, dynamic>>(
         success: false,
-        message: 'Google sign-in error: ${e.description ?? e.code.name}',
+        message: e.description?.isNotEmpty == true
+            ? e.description!
+            : 'Unable to sign in with Google. Please try again.',
         statusCode: 400,
       );
     } catch (e) {
+      final errStr = e.toString().toLowerCase();
+      String friendlyMessage;
+      if (errStr.contains('cancel')) {
+        friendlyMessage = 'Google sign-in was cancelled.';
+      } else if (errStr.contains('network') ||
+          errStr.contains('socket') ||
+          errStr.contains('connection') ||
+          errStr.contains('timeout')) {
+        friendlyMessage =
+            'Network error: unable to connect to Google. Please check your internet connection.';
+      } else if (errStr.contains('api: 10') || errStr.contains('developer_error')) {
+        friendlyMessage =
+            'Google Sign-In configuration error. Please log in using your email/phone and password.';
+      } else {
+        friendlyMessage =
+            'Unable to complete Google sign-in. Please try again or use your password.';
+      }
+
       return ApiResponse<Map<String, dynamic>>(
         success: false,
-        message: 'Google sign-in failed: $e',
+        message: friendlyMessage,
         statusCode: 500,
       );
     }
