@@ -10,7 +10,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Kirana Pasal'), findsOneWidget);
+    expect(find.text('pasal365'), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
     expect(find.text('Continue with Google'), findsOneWidget);
     expect(find.text('Email'), findsOneWidget);

@@ -55,7 +55,7 @@ class LogoutConfirmationSheet extends StatelessWidget {
             ),
             const Gap(4),
             Text(
-              'Are you sure you want to log out of KRM Kirana?',
+              'Are you sure you want to log out of pasal365?',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: colors.inputLabel),
             ),

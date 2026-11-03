@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/network/api_client.dart';
@@ -810,6 +811,36 @@ class _MoreScreenState extends State<MoreScreen> {
                           ),
                         ],
                       ),
+                      const Gap(24),
+                      Center(
+                        child: Column(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/logokirana360.svg',
+                              width: 32,
+                              height: 32,
+                            ),
+                            const Gap(8),
+                            const Text(
+                              'pasal365 • v1.0.0',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                            const Gap(2),
+                            const Text(
+                              'Smart Retail & Kirana Management',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Gap(16),
                     ],
                   ),
                 ),

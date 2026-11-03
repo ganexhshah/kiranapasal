@@ -4,7 +4,7 @@ import 'core/repositories/app_data_repository.dart';
 import 'core/services/printing_service.dart';
 import 'core/services/product_settings_service.dart';
 import 'core/theme/theme.dart';
-import 'features/auth/auth.dart';
+import 'features/splash/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +23,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kirana Pasal',
+      title: 'pasal365',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: home ?? const LoginScreen(),
+      home: home ?? const SplashScreen(),
     );
   }
 }

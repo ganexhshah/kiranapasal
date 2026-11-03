@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/services/auth_service.dart';
@@ -190,7 +191,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
+                // Logo & Header
+                Hero(
+                  tag: 'app_logo',
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0066FF).withValues(alpha: 0.12),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/icons/logokirana360.svg',
+                      width: 52,
+                      height: 52,
+                    ),
+                  ),
+                ),
+                const Gap(14),
                 Text(
                   'Create Account',
                   style: TextStyle(
@@ -202,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const Gap(6),
                 Text(
-                  'Join KRM Kirana Pasal and manage your store online.',
+                  'Join pasal365 and manage your store online.',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,

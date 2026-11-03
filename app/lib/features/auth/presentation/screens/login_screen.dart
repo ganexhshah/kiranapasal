@@ -291,9 +291,32 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Gap(12),
 
-                  // Header
+                  // Official Logo & Header
+                  Hero(
+                    tag: 'app_logo',
+                    child: Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF0066FF).withValues(alpha: 0.12),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/icons/logokirana360.svg',
+                        width: 58,
+                        height: 58,
+                      ),
+                    ),
+                  ),
+                  const Gap(16),
                   Text(
-                    'Kirana Pasal',
+                    'pasal365',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,

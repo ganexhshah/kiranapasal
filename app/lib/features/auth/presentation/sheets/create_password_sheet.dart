@@ -116,7 +116,7 @@ class _CreatePasswordSheetState extends State<CreatePasswordSheet> {
               ),
               const Gap(6),
               Text(
-                'Please set a secure password for your Kirana Pasal account.',
+                'Please set a secure password for your pasal365 account.',
                 style: TextStyle(
                   fontSize: 14,
                   color: colors.inputLabel,
