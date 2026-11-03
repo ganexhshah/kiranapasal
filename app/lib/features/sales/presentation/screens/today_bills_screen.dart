@@ -9,6 +9,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/utils/parse_utils.dart';
 import '../../../../core/widgets/core_widgets.dart';
 import '../sheets/bill_actions_sheet.dart';
+import '../sheets/bill_date_picker_sheet.dart';
 import 'sales_screen.dart';
 import 'transaction_details_screen.dart';
 
@@ -124,6 +125,10 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
   String _searchQuery = '';
   String _selectedPaymentFilter = 'All'; // 'All', 'Cash', 'QR / Online', 'Credit (Udhar)'
 
+  DateTime _selectedDate = DateTime.now();
+  List<TodayBillItem>? _customDateBills;
+  bool _isLoadingDate = false;
+
   @override
   void initState() {
     super.initState();
@@ -138,7 +143,63 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
     super.dispose();
   }
 
-  List<TodayBillItem> get _bills => AppDataRepository.instance.todayBills;
+  bool get _isToday {
+    final now = DateTime.now();
+    return _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+  }
+
+  String get _dateDisplayLabel {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final sel = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final diff = today.difference(sel).inDays;
+    if (diff == 0) return 'Today, ${DateFormat('dd MMM').format(_selectedDate)}';
+    if (diff == 1) return 'Yesterday, ${DateFormat('dd MMM').format(_selectedDate)}';
+    return DateFormat('dd MMM yyyy').format(_selectedDate);
+  }
+
+  List<TodayBillItem> get _bills =>
+      _isToday ? AppDataRepository.instance.todayBills : (_customDateBills ?? []);
+
+  Future<void> _selectDate() async {
+    final picked = await BillDatePickerSheet.show(
+      context,
+      selectedDate: _selectedDate,
+    );
+    if (picked == null || !mounted) return;
+
+    final now = DateTime.now();
+    final isToday = picked.year == now.year &&
+        picked.month == now.month &&
+        picked.day == now.day;
+
+    setState(() {
+      _selectedDate = picked;
+      if (isToday) {
+        _customDateBills = null;
+      } else {
+        _isLoadingDate = true;
+      }
+    });
+
+    if (!isToday) {
+      try {
+        final bills = await AppDataRepository.instance.fetchBillsForDate(picked);
+        if (mounted) {
+          setState(() {
+            _customDateBills = bills;
+            _isLoadingDate = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoadingDate = false);
+        }
+      }
+    }
+  }
 
   List<TodayBillItem> get _filteredBills {
     return _bills.where((bill) {
@@ -333,164 +394,212 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                     b.paymentMethod.contains('Udhar')))
             .fold<double>(0, (sum, b) => sum + b.amount);
 
-    final todayFormatted = DateFormat('EEE, dd MMM yyyy').format(DateTime.now());
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              // Top Bar
-              AppTopBar(
-                title: "Today's Bills",
-                leading: IconButton(
-                  icon: const Icon(LucideIcons.arrowLeft, size: 20, color: Color(0xFF0F172A)),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                actions: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(8),
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.white,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  // Top Bar with Interactive Date Picker Button
+                  AppTopBar(
+                    title: _isToday ? "Today's Bills" : "Bills History",
+                    leading: IconButton(
+                      icon: const Icon(LucideIcons.arrowLeft, size: 20, color: Color(0xFF0F172A)),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    child: Text(
-                      todayFormatted,
-                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Scrollable Bills List & Summaries with Drag-to-Refresh & Sliver Virtualization
-              Expanded(
-                child: RefreshIndicator(
-                  color: const Color(0xFF0066FF),
-                  backgroundColor: Colors.white,
-                  onRefresh: () async {
-                    await AppDataRepository.instance.refreshAll(force: true);
-                  },
-                  child: CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-                        sliver: SliverToBoxAdapter(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Today's Sales Banner Card (Dark Navy Modern Hero)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0A192F), Color(0xFF1E3A8A)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: InkWell(
+                          onTap: _selectDate,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: _isToday ? const Color(0xFFEFF6FF) : const Color(0xFFFEF3C7),
+                              border: Border.all(
+                                color: _isToday ? const Color(0xFFBFDBFE) : const Color(0xFFFDE68A),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 28,
-                                      height: 28,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(7),
+                                Icon(
+                                  LucideIcons.calendar,
+                                  size: 13,
+                                  color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFD97706),
+                                ),
+                                const Gap(5),
+                                Text(
+                                  _dateDisplayLabel,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFB45309),
+                                  ),
+                                ),
+                                const Gap(4),
+                                Icon(
+                                  LucideIcons.chevronDown,
+                                  size: 12,
+                                  color: _isToday ? const Color(0xFF0066FF) : const Color(0xFFB45309),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Scrollable Bills List & Summaries with Drag-to-Refresh & Sliver Virtualization
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: const Color(0xFF0066FF),
+                      backgroundColor: Colors.white,
+                      onRefresh: () async {
+                        if (_isToday) {
+                          await AppDataRepository.instance.refreshAll(force: true);
+                        } else {
+                          final bills = await AppDataRepository.instance.fetchBillsForDate(_selectedDate);
+                          if (mounted) {
+                            setState(() => _customDateBills = bills);
+                          }
+                        }
+                      },
+                      child: CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+                            sliver: SliverToBoxAdapter(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Clean Overview Card (Kirana Blue Modern Header)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF0052CC), Color(0xFF0066FF)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
                                       ),
-                                      alignment: Alignment.center,
-                                      child: const Icon(LucideIcons.receipt, size: 15, color: Colors.white),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              _isToday
+                                                  ? "Today's Total Sales"
+                                                  : "Total Sales (${DateFormat('dd MMM').format(_selectedDate)})",
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withValues(alpha: 0.18),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                '${_bills.length} Bills',
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(4),
+                                        Text(
+                                          'Rs. ${totalSales.toInt()}',
+                                          style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                        const Gap(10),
+
+                                        // Payment Mode Breakdown - Single clean inline bar
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+                                              _inlineStat('Cash', 'Rs. ${cashSales.toInt()}', const Color(0xFF86EFAC)),
+                                              Container(width: 1, height: 12, color: Colors.white24),
+                                              _inlineStat('QR', 'Rs. ${onlineSales.toInt()}', const Color(0xFFBAE6FD)),
+                                              Container(width: 1, height: 12, color: Colors.white24),
+                                              _inlineStat('Udhar', 'Rs. ${creditSales.toInt()}', const Color(0xFFFDE68A)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Historical Date Active Banner
+                                  if (!_isToday) ...[
                                     const Gap(8),
-                                    const Text(
-                                      "Today's Overview",
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white70,
+                                    InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedDate = DateTime.now();
+                                          _customDateBills = null;
+                                        });
+                                      },
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFEF3C7),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: const Color(0xFFFDE68A)),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(LucideIcons.info, size: 13, color: Color(0xFFB45309)),
+                                            const Gap(6),
+                                            Expanded(
+                                              child: Text(
+                                                'Viewing bills for ${DateFormat('dd MMM yyyy').format(_selectedDate)}. Tap to return to Today.',
+                                                style: const TextStyle(fontSize: 11.5, color: Color(0xFF92400E), fontWeight: FontWeight.w600),
+                                              ),
+                                            ),
+                                            const Icon(LucideIcons.rotateCcw, size: 12, color: Color(0xFFB45309)),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '${_bills.length} Bills Created',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Gap(10),
-                            Text(
-                              'Rs. ${totalSales.toInt()}',
-                              style: const TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const Gap(14),
-
-                            // Payment Mode Breakdown Pills
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _miniPill(
-                                    'Cash',
-                                    'Rs. ${cashSales.toInt()}',
-                                    const Color(0xFF10B981),
-                                  ),
-                                ),
-                                const Gap(8),
-                                Expanded(
-                                  child: _miniPill(
-                                    'Online / QR',
-                                    'Rs. ${onlineSales.toInt()}',
-                                    const Color(0xFF38BDF8),
-                                  ),
-                                ),
-                                const Gap(8),
-                                Expanded(
-                                  child: _miniPill(
-                                    'Credit / Udhar',
-                                    'Rs. ${creditSales.toInt()}',
-                                    const Color(0xFFFBBF24),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Gap(14),
+                                  const Gap(12),
 
                       // Search Bar
                       Container(
@@ -566,7 +675,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
               ),
 
               // Bills List, Skeleton, or Empty State
-              if (AppDataRepository.instance.isLoading && filtered.isEmpty)
+              if (_isLoadingDate || (AppDataRepository.instance.isLoading && filtered.isEmpty))
                 const SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverToBoxAdapter(
@@ -588,13 +697,27 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: const Column(
+                      child: Column(
                         children: [
-                          Icon(LucideIcons.receiptText, size: 36, color: Color(0xFF94A3B8)),
-                          Gap(10),
-                          Text('No matching bills found', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF334155))),
-                          Gap(4),
-                          Text('Try checking another filter or clear search', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                          const Icon(LucideIcons.receiptText, size: 36, color: Color(0xFF94A3B8)),
+                          const Gap(10),
+                          Text(
+                            _searchQuery.isNotEmpty
+                                ? 'No matching bills found'
+                                : (_isToday
+                                    ? 'No bills created today yet'
+                                    : 'No bills found for ${DateFormat('dd MMM yyyy').format(_selectedDate)}'),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                          ),
+                          const Gap(4),
+                          Text(
+                            _searchQuery.isNotEmpty
+                                ? 'Try checking another filter or clear search'
+                                : (_isToday
+                                    ? 'Bills generated from POS will appear here'
+                                    : 'Try choosing another date from the calendar'),
+                            style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                          ),
                         ],
                       ),
                     ),
@@ -605,7 +728,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList.separated(
                     itemCount: filtered.length,
-                    separatorBuilder: (_, _) => const Gap(10),
+                    separatorBuilder: (_, _) => const Gap(8),
                     itemBuilder: (context, index) {
                       final bill = filtered[index];
                       return _buildBillCard(bill);
@@ -661,31 +784,23 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
     );
   }
 
-  Widget _miniPill(String label, String amount, Color accentColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w500),
+  Widget _inlineStat(String label, String amount, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 11, color: Colors.white70),
+        ),
+        Text(
+          amount,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w700,
+            color: color,
           ),
-          const Gap(2),
-          Text(
-            amount,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: accentColor,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -715,7 +830,7 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
   Widget _buildBillCard(TodayBillItem bill) {
     final timeStr = DateFormat('hh:mm a').format(bill.timestamp);
     final isCash = bill.paymentMethod == 'Cash';
-    final isQR = bill.paymentMethod.contains('QR');
+    final isQR = bill.paymentMethod.contains('QR') || bill.paymentMethod.contains('Card');
 
     final badgeBg = isCash
         ? const Color(0xFFDCFCE7)
@@ -730,52 +845,75 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
 
     return InkWell(
       onTap: () => _openBillDetails(bill),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
           color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Bill Top Row: Bill #, Time, Payment Pill, Three-dot options
+            // Row 1: Bill # + payment badge, and Total Amount
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Bill #${bill.billNumber}',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const Gap(6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: badgeBg,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        bill.paymentMethod,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: badgeColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Rs. ${bill.amount.toInt()}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ],
+            ),
+            const Gap(5),
+            // Row 2: Customer Name • Items count, and Time + more menu
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'Bill #${bill.billNumber}',
-                          style: const TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const Gap(8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          bill.paymentMethod,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: badgeColor,
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    '${bill.customerName} • ${bill.itemsCount} ${bill.itemsCount == 1 ? 'item' : 'items'} (${bill.itemsSummary})',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const Gap(8),
@@ -784,69 +922,17 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
                   children: [
                     Text(
                       timeStr,
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                     ),
-                    IconButton(
-                      icon: const Icon(LucideIcons.moreVertical, size: 15, color: Color(0xFF94A3B8)),
-                      onPressed: () => _showBillActions(bill),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.only(left: 6),
+                    InkWell(
+                      onTap: () => _showBillActions(bill),
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 6, top: 2, bottom: 2),
+                        child: Icon(LucideIcons.moreVertical, size: 14, color: Color(0xFF94A3B8)),
+                      ),
                     ),
                   ],
-                ),
-              ],
-            ),
-            const Gap(8),
-
-            // Customer Name & Items preview
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(LucideIcons.user, size: 13, color: Color(0xFF64748B)),
-                          const Gap(5),
-                          Expanded(
-                            child: Text(
-                              bill.customerName,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF334155),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Gap(3),
-                      Text(
-                        '${bill.itemsCount} items: ${bill.itemsSummary}',
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          color: Color(0xFF64748B),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const Gap(10),
-                Text(
-                  'Rs. ${bill.amount.toInt()}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
-                    letterSpacing: -0.3,
-                  ),
                 ),
               ],
             ),

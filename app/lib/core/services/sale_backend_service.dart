@@ -40,10 +40,11 @@ class SaleBackendService {
     );
   }
 
-  /// Fetch Today's Bills list
-  Future<ApiResponse<List<dynamic>>> getTodayBills({String? paymentMethod}) async {
+  /// Fetch Bills list (defaults to today, or specific date in yyyy-MM-dd format)
+  Future<ApiResponse<List<dynamic>>> getTodayBills({String? paymentMethod, String? date}) async {
     final query = <String, dynamic>{
       if (paymentMethod != null && paymentMethod != 'All') 'payment_method': paymentMethod,
+      if (date != null && date.isNotEmpty) 'date': date,
     };
 
     return _client.get<List<dynamic>>(

@@ -44,12 +44,22 @@ class SaleController extends BaseApiController
      */
     public function todayBills(Request $request): JsonResponse
     {
-        $todayStart = Carbon::today('Asia/Kathmandu');
-
         $query = Sale::with(['customer', 'items'])
-            ->where('created_at', '>=', $todayStart)
             ->where('is_cancelled', false)
             ->orderByDesc('created_at');
+
+        if ($request->filled('date')) {
+            try {
+                $targetDate = Carbon::parse($request->query('date'), 'Asia/Kathmandu');
+                $start = $targetDate->copy()->startOfDay();
+                $end = $targetDate->copy()->endOfDay();
+                $query->whereBetween('created_at', [$start, $end]);
+            } catch (\Exception $e) {
+                $query->where('created_at', '>=', Carbon::today('Asia/Kathmandu'));
+            }
+        } else {
+            $query->where('created_at', '>=', Carbon::today('Asia/Kathmandu'));
+        }
 
         if ($request->filled('payment_method') && $request->query('payment_method') !== 'All') {
             $method = $request->query('payment_method');

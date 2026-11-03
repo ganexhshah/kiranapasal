@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import '../../features/products/domain/models/product.dart';
 import '../../features/sales/domain/models/cart_item.dart';
 import '../../features/sales/domain/models/customer.dart';
@@ -655,6 +656,31 @@ class AppDataRepository extends ChangeNotifier {
         }
       }
     } catch (_) {}
+  }
+
+  /// Fetch bills for any specified date (defaults to today if null)
+  Future<List<TodayBillItem>> fetchBillsForDate(DateTime date) async {
+    final now = DateTime.now();
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    try {
+      final res = await _saleService.getTodayBills(date: dateStr);
+      if (res.success && res.data != null) {
+        final items = res.data!
+            .map((b) => TodayBillItem.fromJson(b as Map<String, dynamic>))
+            .toList();
+        if (isToday) {
+          _todayBills = items;
+          notifyListeners();
+        }
+        return items;
+      }
+    } catch (_) {}
+
+    if (isToday) {
+      return _todayBills;
+    }
+    return [];
   }
 
   Future<void> _loadTransactions() async {
