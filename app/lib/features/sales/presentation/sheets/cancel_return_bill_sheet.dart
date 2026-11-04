@@ -12,9 +12,8 @@ enum CancelReturnActionType {
   returned,
 }
 
-/// Modal bottom sheet allowing shopkeepers to either:
-/// 1. Void / Cancel an entire bill with complete inventory restock & financial reversal.
-/// 2. Process partial or full item returns with quantity steppers and refund method selection.
+/// Modal bottom sheet allowing shopkeepers to void a bill or return specific items.
+/// Styled according to pasal365's clean white theme with zero neon tints and no clutter.
 class CancelReturnBillSheet extends StatefulWidget {
   const CancelReturnBillSheet({
     super.key,
@@ -105,30 +104,28 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
 
   // Void Tab State
   String _voidReason = 'Customer cancelled';
-  final TextEditingController _voidNoteController = TextEditingController();
 
   static const List<String> _voidReasons = [
     'Customer cancelled',
-    'Entered wrong items / price',
-    'Duplicate bill generated',
+    'Wrong items / price',
+    'Duplicate bill',
     'Payment failed',
-    'Customer returned all goods',
-    'Other reason',
+    'Other',
   ];
 
   // Return Tab State
   late List<bool> _selectedItems;
   late List<double> _returnQuantities;
   bool _restockReturnedItems = true;
-  String _returnReason = 'Customer returned (good condition)';
+  String _returnReason = 'Customer return';
   late String _refundMethod;
 
   static const List<String> _returnReasons = [
-    'Customer returned (good condition)',
-    'Defective / damaged item',
+    'Customer return',
+    'Damaged / defective',
     'Expired product',
-    'Wrong item given',
-    'Customer changed mind',
+    'Wrong item',
+    'Other',
   ];
 
   @override
@@ -136,22 +133,14 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
     super.initState();
     _selectedTab = widget.initialIsReturn ? 1 : 0;
 
-    // Initialize item selection state
     _selectedItems = List<bool>.filled(widget.items.length, true);
     _returnQuantities = widget.items.map((it) => it.quantity).toList();
 
-    // Default refund method based on original payment
     if (widget.paymentMethod.contains('Credit') || widget.udharAmount > 0) {
       _refundMethod = 'Credit (Udhar) Reversal';
     } else {
       _refundMethod = 'Cash';
     }
-  }
-
-  @override
-  void dispose() {
-    _voidNoteController.dispose();
-    super.dispose();
   }
 
   double get _calculatedRefundTotal {
@@ -174,14 +163,10 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
     HapticFeedback.mediumImpact();
     setState(() => _isProcessing = true);
 
-    final finalReason = _voidNoteController.text.trim().isNotEmpty
-        ? '$_voidReason - ${_voidNoteController.text.trim()}'
-        : _voidReason;
-
     try {
       final success = await AppDataRepository.instance.voidBill(
         widget.billNumber,
-        finalReason,
+        _voidReason,
       );
 
       if (!mounted) return;
@@ -191,19 +176,8 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
         Navigator.pop(context, CancelReturnActionType.voided);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
-              children: [
-                const Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
-                const Gap(10),
-                Expanded(
-                  child: Text(
-                    'Bill #${widget.billNumber} has been successfully voided.',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF16A34A),
+            content: Text('Bill #${widget.billNumber} voided'),
+            backgroundColor: const Color(0xFF0F172A),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -211,7 +185,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to void bill. Please try again.'),
-            backgroundColor: Color(0xFFEF4444),
+            backgroundColor: Color(0xFFDC2626),
           ),
         );
       }
@@ -220,8 +194,8 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error voiding bill: $e'),
-          backgroundColor: const Color(0xFFEF4444),
+          content: Text('Error: $e'),
+          backgroundColor: const Color(0xFFDC2626),
         ),
       );
     }
@@ -234,7 +208,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select at least 1 item to return.'),
-          backgroundColor: Color(0xFFEF4444),
+          backgroundColor: Color(0xFFDC2626),
         ),
       );
       return;
@@ -275,19 +249,8 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
         Navigator.pop(context, CancelReturnActionType.returned);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
-              children: [
-                const Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
-                const Gap(10),
-                Expanded(
-                  child: Text(
-                    'Return processed: Rs. ${refundAmount.toStringAsFixed(0)} refunded via $_refundMethod.',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF16A34A),
+            content: Text('Return processed: Rs. ${refundAmount.toInt()} refunded'),
+            backgroundColor: const Color(0xFF0F172A),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -297,8 +260,8 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
       setState(() => _isProcessing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error processing return: $e'),
-          backgroundColor: const Color(0xFFEF4444),
+          content: Text('Error: $e'),
+          backgroundColor: const Color(0xFFDC2626),
         ),
       );
     }
@@ -312,11 +275,11 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.90,
+        maxHeight: MediaQuery.of(context).size.height * 0.88,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         top: false,
@@ -325,17 +288,17 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Top Drag Handle
+              // Drag Handle
               const Gap(10),
               Container(
-                width: 40,
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
+                  color: const Color(0xFFE2E8F0),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const Gap(14),
+              const Gap(12),
 
               // Header Row
               Padding(
@@ -343,17 +306,18 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
                       alignment: Alignment.center,
-                      child: const Icon(
-                        LucideIcons.undo2,
-                        size: 20,
-                        color: Color(0xFFEF4444),
+                      child: Icon(
+                        LucideIcons.receipt,
+                        size: 18,
+                        color: colors.darkText,
                       ),
                     ),
                     const Gap(12),
@@ -361,41 +325,19 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Bill #${widget.billNumber}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: colors.darkText,
-                                ),
-                              ),
-                              const Gap(8),
-                              if (isAlreadyVoid)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFEE2E2),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: const Text(
-                                    'ALREADY VOID',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFFEF4444),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                          Text(
+                            'Bill #${widget.billNumber}',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: colors.darkText,
+                            ),
                           ),
                           const Gap(2),
                           Text(
                             '${widget.customerName} • Rs. ${widget.totalAmount.toInt()} (${widget.paymentMethod})',
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.w500,
                               color: colors.inputLabel,
                             ),
                           ),
@@ -410,49 +352,63 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                   ],
                 ),
               ),
-              const Gap(14),
+              const Gap(12),
 
               if (isAlreadyVoid)
                 Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(LucideIcons.ban, size: 36, color: Color(0xFFEF4444)),
-                        const Gap(10),
-                        const Text(
-                          'This bill has already been voided / cancelled.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        const Gap(16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.info, size: 18, color: Color(0xFF64748B)),
+                            const Gap(10),
+                            Expanded(
+                              child: Text(
+                                'This bill has already been voided.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.darkText,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Gap(16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFCBD5E1)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
+                          child: Text('Close', style: TextStyle(color: colors.darkText)),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 )
               else ...[
-                // Segmented Tab Pill Selector
+                // Segmented Pill Tab Switcher
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
-                    height: 44,
-                    padding: const EdgeInsets.all(4),
+                    height: 40,
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
@@ -463,39 +419,22 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                               setState(() => _selectedTab = 0);
                             },
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
+                              duration: const Duration(milliseconds: 150),
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: _selectedTab == 0 ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: _selectedTab == 0
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
+                                borderRadius: BorderRadius.circular(7),
+                                border: _selectedTab == 0
+                                    ? Border.all(color: const Color(0xFFCBD5E1), width: 0.8)
                                     : null,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    LucideIcons.ban,
-                                    size: 15,
-                                    color: _selectedTab == 0 ? const Color(0xFFEF4444) : const Color(0xFF64748B),
-                                  ),
-                                  const Gap(6),
-                                  Text(
-                                    'Void Entire Bill',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: _selectedTab == 0 ? FontWeight.w700 : FontWeight.w500,
-                                      color: _selectedTab == 0 ? const Color(0xFFEF4444) : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                'Void Entire Bill',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: _selectedTab == 0 ? FontWeight.w700 : FontWeight.w500,
+                                  color: _selectedTab == 0 ? colors.darkText : colors.inputLabel,
+                                ),
                               ),
                             ),
                           ),
@@ -507,39 +446,22 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                               setState(() => _selectedTab = 1);
                             },
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
+                              duration: const Duration(milliseconds: 150),
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: _selectedTab == 1 ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: _selectedTab == 1
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
+                                borderRadius: BorderRadius.circular(7),
+                                border: _selectedTab == 1
+                                    ? Border.all(color: const Color(0xFFCBD5E1), width: 0.8)
                                     : null,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    LucideIcons.rotateCcw,
-                                    size: 15,
-                                    color: _selectedTab == 1 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                                  ),
-                                  const Gap(6),
-                                  Text(
-                                    'Return Items',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: _selectedTab == 1 ? FontWeight.w700 : FontWeight.w500,
-                                      color: _selectedTab == 1 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                'Return Items',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: _selectedTab == 1 ? FontWeight.w700 : FontWeight.w500,
+                                  color: _selectedTab == 1 ? colors.darkText : colors.inputLabel,
+                                ),
                               ),
                             ),
                           ),
@@ -558,7 +480,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                   ),
                 ),
 
-                // Bottom Sticky Action Buttons
+                // Bottom Action Buttons
                 _buildBottomActions(colors),
               ],
             ],
@@ -571,41 +493,12 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
   // ==================== TAB 1: VOID ENTIRE BILL ====================
 
   Widget _buildVoidTab(AppColorsExtension colors) {
-    final isUdhar = widget.paymentMethod.contains('Credit') || widget.udharAmount > 0;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Warning Banner
+        // Summary Card
         Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFEF2F2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFCA5A5).withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(LucideIcons.alertTriangle, size: 18, color: Color(0xFFEF4444)),
-              const Gap(10),
-              Expanded(
-                child: Text(
-                  'Voiding will cancel this bill permanently. All ${widget.items.length} items will be restored to store inventory.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF991B1B),
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Gap(16),
-
-        // Impact Summary Card
-        Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
@@ -614,29 +507,41 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
           ),
           child: Column(
             children: [
-              _buildImpactRow(
-                icon: LucideIcons.packagePlus,
-                iconColor: const Color(0xFF16A34A),
-                title: 'Inventory Restock',
-                detail: '${widget.items.length} product(s) added back to stock',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Bill Amount',
+                    style: TextStyle(fontSize: 13, color: colors.inputLabel),
+                  ),
+                  Text(
+                    'Rs. ${widget.totalAmount.toInt()}',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: colors.darkText),
+                  ),
+                ],
               ),
-              const Divider(height: 18, color: Color(0xFFE2E8F0)),
-              _buildImpactRow(
-                icon: isUdhar ? LucideIcons.bookOpen : LucideIcons.wallet,
-                iconColor: isUdhar ? const Color(0xFFD97706) : const Color(0xFF2563EB),
-                title: isUdhar ? 'Udhar Khata Reversal' : 'Payment Refund',
-                detail: isUdhar
-                    ? 'Rs. ${widget.totalAmount.toInt()} cleared from ${widget.customerName}\'s balance'
-                    : 'Rs. ${widget.totalAmount.toInt()} cash/payment refunded to customer',
+              const Gap(8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Items to Restock',
+                    style: TextStyle(fontSize: 13, color: colors.inputLabel),
+                  ),
+                  Text(
+                    '${widget.items.length} items',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.darkText),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        const Gap(18),
+        const Gap(16),
 
         // Reason Selector
         Text(
-          'Reason for Cancellation',
+          'Reason',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -657,95 +562,20 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                 setState(() => _voidReason = reason);
               },
               backgroundColor: Colors.white,
-              selectedColor: const Color(0xFFEF4444).withValues(alpha: 0.1),
+              selectedColor: const Color(0xFF0F172A),
               side: BorderSide(
-                color: isSelected ? const Color(0xFFEF4444) : const Color(0xFFCBD5E1),
+                color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFCBD5E1),
               ),
               labelStyle: TextStyle(
                 fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? const Color(0xFFEF4444) : const Color(0xFF475569),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xFF475569),
               ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             );
           }).toList(),
         ),
         const Gap(14),
-
-        // Optional Remarks
-        Text(
-          'Optional Notes',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: colors.darkText,
-          ),
-        ),
-        const Gap(6),
-        TextField(
-          controller: _voidNoteController,
-          maxLines: 2,
-          decoration: InputDecoration(
-            hintText: 'e.g., Customer brought items back immediately...',
-            hintStyle: TextStyle(fontSize: 12, color: colors.inputLabel),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            filled: true,
-            fillColor: const Color(0xFFF8FAFC),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF2563EB)),
-            ),
-          ),
-        ),
-        const Gap(10),
-      ],
-    );
-  }
-
-  Widget _buildImpactRow({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String detail,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          alignment: Alignment.center,
-          child: Icon(icon, size: 15, color: iconColor),
-        ),
-        const Gap(10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
-              ),
-              const Gap(1),
-              Text(
-                detail,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -759,42 +589,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Instructions
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Select items to return:',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: colors.darkText,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                final allSelected = _selectedItems.every((it) => it);
-                setState(() {
-                  for (int i = 0; i < _selectedItems.length; i++) {
-                    _selectedItems[i] = !allSelected;
-                  }
-                });
-              },
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-              ),
-              child: Text(
-                _selectedItems.every((it) => it) ? 'Deselect All' : 'Select All',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2563EB)),
-              ),
-            ),
-          ],
-        ),
-        const Gap(8),
-
-        // Items List with Stepper
+        // Items List
         if (widget.items.isEmpty)
           Container(
             padding: const EdgeInsets.all(16),
@@ -802,8 +597,12 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
-            child: const Text('No individual items on this bill. Use "Void Entire Bill".'),
+            child: Text(
+              'No items on this bill. Use "Void Entire Bill".',
+              style: TextStyle(fontSize: 12, color: colors.inputLabel),
+            ),
           )
         else
           ...List.generate(widget.items.length, (idx) {
@@ -815,12 +614,12 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
 
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF2563EB).withValues(alpha: 0.3) : const Color(0xFFE2E8F0),
+                  color: isSelected ? const Color(0xFFCBD5E1) : const Color(0xFFE2E8F0),
                 ),
               ),
               child: Column(
@@ -834,11 +633,11 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                           setState(() => _selectedItems[idx] = !_selectedItems[idx]);
                         },
                         child: Container(
-                          width: 22,
-                          height: 22,
+                          width: 20,
+                          height: 20,
                           decoration: BoxDecoration(
                             color: isSelected ? const Color(0xFF2563EB) : Colors.white,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFCBD5E1),
                               width: 1.5,
@@ -846,13 +645,13 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                           ),
                           alignment: Alignment.center,
                           child: isSelected
-                              ? const Icon(LucideIcons.check, size: 14, color: Colors.white)
+                              ? const Icon(LucideIcons.check, size: 13, color: Colors.white)
                               : null,
                         ),
                       ),
                       const Gap(10),
 
-                      // Name & Details
+                      // Item Details
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,13 +660,13 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                               item.name,
                               style: TextStyle(
                                 fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 color: colors.darkText,
                               ),
                             ),
-                            const Gap(2),
+                            const Gap(1),
                             Text(
-                              'Bought: ${item.quantity.toInt()} ${item.unit} @ Rs. ${item.rate.toInt()}',
+                              '${item.quantity.toInt()} ${item.unit} • Rs. ${item.rate.toInt()}/${item.unit}',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: colors.inputLabel,
@@ -881,39 +680,39 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                       Text(
                         'Rs. ${lineTotal.toInt()}',
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? colors.darkText : const Color(0xFF94A3B8),
                         ),
                       ),
                     ],
                   ),
 
-                  // Quantity Stepper (if selected)
+                  // Quantity Stepper (when checked)
                   if (isSelected) ...[
-                    const Gap(10),
+                    const Gap(8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          'Return Qty: ',
-                          style: TextStyle(fontSize: 12, color: colors.inputLabel, fontWeight: FontWeight.w500),
+                          'Return:',
+                          style: TextStyle(fontSize: 12, color: colors.inputLabel),
                         ),
-                        const Gap(6),
+                        const Gap(8),
                         Container(
-                          height: 32,
+                          height: 30,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: const Color(0xFFCBD5E1)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(LucideIcons.minus, size: 14),
+                                icon: const Icon(LucideIcons.minus, size: 13),
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
                                 onPressed: returnQty > 1
                                     ? () {
                                         HapticFeedback.selectionClick();
@@ -922,20 +721,20 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                                     : null,
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
                                 child: Text(
                                   '${returnQty.toInt()} ${item.unit}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w600,
                                     color: colors.darkText,
                                   ),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(LucideIcons.plus, size: 14),
+                                icon: const Icon(LucideIcons.plus, size: 13),
                                 visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
                                 onPressed: returnQty < maxQty
                                     ? () {
                                         HapticFeedback.selectionClick();
@@ -953,47 +752,26 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
               ),
             );
           }),
-        const Gap(14),
+        const Gap(10),
 
-        // Restock Switch
+        // Restock Switch Row
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF16A34A).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(LucideIcons.boxes, size: 16, color: Color(0xFF16A34A)),
-              ),
-              const Gap(10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Restock into Store Inventory',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
-                    ),
-                    Text(
-                      _restockReturnedItems ? 'Stock will be added back' : 'Items written off / damaged',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-                    ),
-                  ],
-                ),
+              Text(
+                'Restock items to inventory',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: colors.darkText),
               ),
               Switch.adaptive(
                 value: _restockReturnedItems,
-                activeTrackColor: const Color(0xFF16A34A),
+                activeTrackColor: const Color(0xFF2563EB),
                 onChanged: (val) {
                   HapticFeedback.selectionClick();
                   setState(() => _restockReturnedItems = val);
@@ -1006,7 +784,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
 
         // Return Reason Chips
         Text(
-          'Reason for Return',
+          'Reason',
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colors.darkText),
         ),
         const Gap(8),
@@ -1023,14 +801,14 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                 setState(() => _returnReason = r);
               },
               backgroundColor: Colors.white,
-              selectedColor: const Color(0xFF2563EB).withValues(alpha: 0.1),
+              selectedColor: const Color(0xFF0F172A),
               side: BorderSide(
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFCBD5E1),
+                color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFCBD5E1),
               ),
               labelStyle: TextStyle(
                 fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF475569),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xFF475569),
               ),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             );
@@ -1038,7 +816,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
         ),
         const Gap(14),
 
-        // Refund Settlement Method
+        // Refund Method
         Text(
           'Refund Method',
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: colors.darkText),
@@ -1053,14 +831,15 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
               onTap: () => setState(() => _refundMethod = 'Cash'),
             ),
             const Gap(8),
-            if (isCustomerKnown)
+            if (isCustomerKnown) ...[
               _buildRefundMethodChip(
                 label: 'Khata Credit',
                 icon: LucideIcons.bookOpen,
                 isSelected: _refundMethod == 'Credit (Udhar) Reversal',
                 onTap: () => setState(() => _refundMethod = 'Credit (Udhar) Reversal'),
               ),
-            const Gap(8),
+              const Gap(8),
+            ],
             _buildRefundMethodChip(
               label: 'Store Credit',
               icon: LucideIcons.ticket,
@@ -1071,36 +850,27 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
         ),
         const Gap(16),
 
-        // Total Refund Calculation Banner
+        // Clean Summary Row
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFBFDBFE)),
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Total Refund Amount',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF1E40AF)),
-                  ),
-                  Text(
-                    '$_selectedItemsCount item(s) selected',
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF3B82F6)),
-                  ),
-                ],
+              Text(
+                'Total Refund',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: colors.darkText),
               ),
               Text(
                 'Rs. ${refundTotal.toInt()}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1E40AF),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: colors.darkText,
                 ),
               ),
             ],
@@ -1124,12 +894,12 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
           onTap();
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2563EB).withValues(alpha: 0.1) : Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFCBD5E1),
+              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -1137,7 +907,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
             children: [
               Icon(
                 icon,
-                size: 18,
+                size: 16,
                 color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
               ),
               const Gap(4),
@@ -1161,7 +931,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
 
   Widget _buildBottomActions(AppColorsExtension colors) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Color(0xFFE2E8F0), width: 1)),
@@ -1172,9 +942,9 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
             child: OutlinedButton(
               onPressed: _isProcessing ? null : () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 side: const BorderSide(color: Color(0xFFCBD5E1)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               child: Text(
                 'Cancel',
@@ -1186,7 +956,7 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
               ),
             ),
           ),
-          const Gap(12),
+          const Gap(10),
           Expanded(
             flex: 2,
             child: ElevatedButton(
@@ -1194,41 +964,30 @@ class _CancelReturnBillSheetState extends State<CancelReturnBillSheet> {
                   ? null
                   : (_selectedTab == 0 ? _handleConfirmVoid : _handleConfirmReturn),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: _selectedTab == 0 ? const Color(0xFFEF4444) : const Color(0xFF2563EB),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                backgroundColor: _selectedTab == 0 ? const Color(0xFFDC2626) : const Color(0xFF2563EB),
                 foregroundColor: Colors.white,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               child: _isProcessing
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 18,
+                      height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _selectedTab == 0 ? LucideIcons.ban : LucideIcons.rotateCcw,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const Gap(8),
-                        Text(
-                          _selectedTab == 0
-                              ? 'Void Entire Bill'
-                              : 'Process Return (Rs. ${_calculatedRefundTotal.toInt()})',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                  : Text(
+                      _selectedTab == 0
+                          ? 'Void Bill'
+                          : 'Process Return (Rs. ${_calculatedRefundTotal.toInt()})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
             ),
           ),

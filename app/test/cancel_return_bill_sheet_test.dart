@@ -57,24 +57,23 @@ void main() {
     // Verify Header details
     expect(find.text('Bill #INV-2611-D1-00001'), findsOneWidget);
     expect(find.textContaining('Shyam Sundar'), findsOneWidget);
-    expect(find.text('Void Entire Bill'), findsWidgets);
+    expect(find.text('Void Entire Bill'), findsOneWidget);
     expect(find.text('Return Items'), findsOneWidget);
 
     // Verify Void Tab contents
-    expect(find.text('Reason for Cancellation'), findsOneWidget);
+    expect(find.text('Reason'), findsOneWidget);
     expect(find.text('Customer cancelled'), findsOneWidget);
-    expect(find.text('Void Entire Bill'), findsWidgets);
+    expect(find.text('Void Bill'), findsOneWidget);
 
     // Switch to Return Items Tab
     await tester.tap(find.text('Return Items'));
     await tester.pumpAndSettle();
 
     // Verify Return Tab contents
-    expect(find.text('Select items to return:'), findsOneWidget);
     expect(find.text('Wai Wai Noodles 75g'), findsOneWidget);
     expect(find.text('Mustard Oil 1L'), findsOneWidget);
-    expect(find.text('Restock into Store Inventory'), findsOneWidget);
-    expect(find.text('Total Refund Amount'), findsOneWidget);
+    expect(find.text('Restock items to inventory'), findsOneWidget);
+    expect(find.text('Total Refund'), findsOneWidget);
     expect(find.text('Rs. 355'), findsOneWidget);
     expect(find.text('Process Return (Rs. 355)'), findsOneWidget);
   });
