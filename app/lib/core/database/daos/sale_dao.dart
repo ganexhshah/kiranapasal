@@ -226,6 +226,284 @@ class SaleDao {
     };
   }
 
+  /// Void / Cancel an entire bill atomically in SQLite.
+  /// 1. Marks sale as cancelled (`is_cancelled = 1`, `cancelled_reason`, `cancelled_at`).
+  /// 2. Restores inventory stock for all line items with movement_type 'RESTOCK_CANCEL'.
+  /// 3. Reverses Udhar Khata if credit was extended.
+  /// 4. Enqueues cancellation to sync_outbox.
+  Future<bool> cancelSale({
+    required String receiptNumber,
+    required String reason,
+    String shopId = 'default_shop',
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    const constProductDao = ProductDao();
+    const constOutboxDao = SyncOutboxDao();
+
+    return await _db.transaction((txn) async {
+      final saleRows = await txn.query(
+        DatabaseConstants.tableSales,
+        where: 'receipt_number = ? AND is_cancelled = 0',
+        whereArgs: [receiptNumber],
+        limit: 1,
+      );
+
+      if (saleRows.isEmpty) {
+        return false;
+      }
+
+      final sale = saleRows.first;
+      final saleId = sale['id'] as String;
+      final customerId = sale['customer_id'] as String?;
+      final udharAmount = (sale['udhar_amount'] as num?)?.toDouble() ?? 0.0;
+
+      // 1. Mark sale cancelled
+      await txn.update(
+        DatabaseConstants.tableSales,
+        {
+          'is_cancelled': 1,
+          'cancelled_reason': reason,
+          'cancelled_at': now,
+          'updated_at': now,
+          'sync_status': DatabaseConstants.syncStatusPending,
+        },
+        where: 'id = ?',
+        whereArgs: [saleId],
+      );
+
+      // 2. Fetch sale items and restore stock
+      final itemRows = await txn.query(
+        DatabaseConstants.tableSaleItems,
+        where: 'sale_id = ?',
+        whereArgs: [saleId],
+      );
+
+      for (final item in itemRows) {
+        final productId = item['product_id'] as String;
+        final qty = (item['quantity'] as num).toDouble();
+        final unit = item['unit_name'] as String? ?? 'pkt';
+
+        await constProductDao.adjustStock(
+          productId: productId,
+          quantityDelta: qty,
+          movementType: 'RESTOCK_CANCEL',
+          unit: unit,
+          referenceId: receiptNumber,
+          reason: 'Void Bill #$receiptNumber: $reason',
+          shopId: shopId,
+          txn: txn,
+        );
+      }
+
+      // 3. Reverse customer udhar if applicable
+      if (udharAmount > 0 && customerId != null && customerId.isNotEmpty) {
+        final custRows = await txn.query(
+          DatabaseConstants.tableCustomers,
+          columns: ['outstanding_udhar'],
+          where: 'id = ?',
+          whereArgs: [customerId],
+        );
+
+        if (custRows.isNotEmpty) {
+          final currentUdhar = (custRows.first['outstanding_udhar'] as num).toDouble();
+          final newUdhar = (currentUdhar - udharAmount).clamp(0.0, 999999.0);
+
+          await txn.update(
+            DatabaseConstants.tableCustomers,
+            {
+              'outstanding_udhar': newUdhar,
+              'updated_at': now,
+              'sync_status': DatabaseConstants.syncStatusPending,
+            },
+            where: 'id = ?',
+            whereArgs: [customerId],
+          );
+
+          await txn.insert(DatabaseConstants.tableCustomerLedgers, {
+            'id': const Uuid().v4(),
+            'shop_id': shopId,
+            'customer_id': customerId,
+            'transaction_type': 'CREDIT_VOID',
+            'reference_no': receiptNumber,
+            'amount': -udharAmount,
+            'balance_after': newUdhar,
+            'payment_method': 'Credit (Udhar)',
+            'note': 'Voided Bill #$receiptNumber: $reason',
+            'created_at': now,
+            'sync_status': DatabaseConstants.syncStatusPending,
+          });
+        }
+      }
+
+      // 4. Enqueue Outbox mutation for cloud sync
+      await constOutboxDao.enqueue(
+        shopId: shopId,
+        entityType: DatabaseConstants.entitySale,
+        entityId: saleId,
+        action: DatabaseConstants.actionUpdate,
+        payload: {
+          'id': saleId,
+          'receipt_number': receiptNumber,
+          'action': 'CANCEL',
+          'cancelled_reason': reason,
+          'cancelled_at': now,
+        },
+        txn: txn,
+      );
+
+      return true;
+    });
+  }
+
+  /// Process partial or full return of items from a bill atomically.
+  /// 1. Optionally restocks returned items to inventory.
+  /// 2. If refund method is Udhar Khata, reduces customer's balance.
+  /// 3. Records refund payment record.
+  /// 4. Enqueues mutation to sync_outbox.
+  Future<Map<String, dynamic>> returnItems({
+    required String receiptNumber,
+    required List<Map<String, dynamic>> returnedItems,
+    required String reason,
+    required String refundMethod,
+    required double refundAmount,
+    String shopId = 'default_shop',
+  }) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    const constProductDao = ProductDao();
+    const constOutboxDao = SyncOutboxDao();
+
+    return await _db.transaction((txn) async {
+      final saleRows = await txn.query(
+        DatabaseConstants.tableSales,
+        where: 'receipt_number = ?',
+        whereArgs: [receiptNumber],
+        limit: 1,
+      );
+
+      final sale = saleRows.isNotEmpty ? saleRows.first : null;
+      final saleId = sale != null ? sale['id'] as String : const Uuid().v4();
+      final customerId = sale != null ? sale['customer_id'] as String? : null;
+
+      // 1. Process returned items and restock if requested
+      for (final item in returnedItems) {
+        final shouldRestock = item['restock'] != false;
+        final qty = (item['quantity'] as num?)?.toDouble() ?? 1.0;
+        final unit = item['unit'] as String? ?? 'pkt';
+        final pId = item['product_id'] as String?;
+        final pName = item['name'] as String? ?? '';
+
+        if (shouldRestock) {
+          String? targetProductId = pId;
+          if (targetProductId == null || targetProductId.isEmpty) {
+            final pRows = await txn.query(
+              DatabaseConstants.tableProducts,
+              columns: ['id'],
+              where: 'LOWER(name) = ? AND is_deleted = 0',
+              whereArgs: [pName.toLowerCase().trim()],
+              limit: 1,
+            );
+            if (pRows.isNotEmpty) {
+              targetProductId = pRows.first['id'] as String;
+            }
+          }
+
+          if (targetProductId != null && targetProductId.isNotEmpty) {
+            await constProductDao.adjustStock(
+              productId: targetProductId,
+              quantityDelta: qty,
+              movementType: 'SALES_RETURN',
+              unit: unit,
+              referenceId: receiptNumber,
+              reason: 'Return Bill #$receiptNumber: $reason',
+              shopId: shopId,
+              txn: txn,
+            );
+          }
+        }
+      }
+
+      // 2. Adjust customer balance if refundMethod is Credit/Udhar
+      if (refundMethod.contains('Credit') || refundMethod.contains('Udhar')) {
+        if (customerId != null && customerId.isNotEmpty) {
+          final custRows = await txn.query(
+            DatabaseConstants.tableCustomers,
+            columns: ['outstanding_udhar'],
+            where: 'id = ?',
+            whereArgs: [customerId],
+          );
+
+          if (custRows.isNotEmpty) {
+            final currentUdhar = (custRows.first['outstanding_udhar'] as num).toDouble();
+            final newUdhar = (currentUdhar - refundAmount).clamp(0.0, 999999.0);
+
+            await txn.update(
+              DatabaseConstants.tableCustomers,
+              {
+                'outstanding_udhar': newUdhar,
+                'updated_at': now,
+                'sync_status': DatabaseConstants.syncStatusPending,
+              },
+              where: 'id = ?',
+              whereArgs: [customerId],
+            );
+
+            await txn.insert(DatabaseConstants.tableCustomerLedgers, {
+              'id': const Uuid().v4(),
+              'shop_id': shopId,
+              'customer_id': customerId,
+              'transaction_type': 'RETURN_CREDIT',
+              'reference_no': receiptNumber,
+              'amount': -refundAmount,
+              'balance_after': newUdhar,
+              'payment_method': 'Credit (Udhar)',
+              'note': 'Return Bill #$receiptNumber: $reason',
+              'created_at': now,
+              'sync_status': DatabaseConstants.syncStatusPending,
+            });
+          }
+        }
+      }
+
+      // 3. Record refund payment
+      await txn.insert(DatabaseConstants.tablePayments, {
+        'id': const Uuid().v4(),
+        'shop_id': shopId,
+        'payable_type': 'SaleReturn',
+        'payable_id': saleId,
+        'payment_method': refundMethod,
+        'amount': refundAmount,
+        'transaction_reference': 'RET-$receiptNumber',
+        'created_at': now,
+        'sync_status': DatabaseConstants.syncStatusPending,
+      });
+
+      // 4. Enqueue to sync outbox
+      await constOutboxDao.enqueue(
+        shopId: shopId,
+        entityType: DatabaseConstants.entitySale,
+        entityId: saleId,
+        action: 'RETURN',
+        payload: {
+          'sale_id': saleId,
+          'receipt_number': receiptNumber,
+          'reason': reason,
+          'refund_method': refundMethod,
+          'refund_amount': refundAmount,
+          'returned_items': returnedItems,
+          'created_at': now,
+        },
+        txn: txn,
+      );
+
+      return {
+        'success': true,
+        'receipt_number': receiptNumber,
+        'refund_amount': refundAmount,
+        'refund_method': refundMethod,
+      };
+    });
+  }
+
   /// Get list of bills for a given date (defaults to today).
   Future<List<TodayBillItem>> getBillsForDate({DateTime? date}) async {
     final targetDate = date ?? DateTime.now();

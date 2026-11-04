@@ -1036,6 +1036,19 @@ class AppDataRepository extends ChangeNotifier {
         }
       }
 
+      // Reverse Udhar if customer had credit on this bill
+      if (bill.udharAmount > 0) {
+        final cIdx = _customers.indexWhere(
+          (c) => c.name == bill.customerName || (bill.customerPhone.isNotEmpty && c.phone == bill.customerPhone),
+        );
+        if (cIdx >= 0) {
+          final c = _customers[cIdx];
+          _customers[cIdx] = c.copyWith(
+            udharBalance: (c.udharBalance - bill.udharAmount).clamp(0.0, 999999.0),
+          );
+        }
+      }
+
       _todayBills[bIdx] = TodayBillItem(
         billNumber: bill.billNumber,
         customerName: bill.customerName,
@@ -1087,6 +1100,18 @@ class AppDataRepository extends ChangeNotifier {
       notifyListeners();
     }
 
+    // 1. Commit cancellation locally to SQLite
+    try {
+      await _saleDao.cancelSale(
+        receiptNumber: billNumber,
+        reason: reason,
+      );
+      SyncEngine.instance.syncNow();
+    } catch (e) {
+      debugPrint('SQLite cancelSale note: $e');
+    }
+
+    // 2. Call backend server
     try {
       await _saleService.cancelSale(
         receiptNumber: billNumber,
@@ -1096,6 +1121,106 @@ class AppDataRepository extends ChangeNotifier {
     } catch (_) {
       return true;
     }
+  }
+
+  /// Process item return / sales return
+  Future<bool> returnBillItems({
+    required String billNumber,
+    required List<TransactionDetailItem> returnedItems,
+    required String reason,
+    required String refundMethod,
+    required double refundAmount,
+    bool restockItems = true,
+  }) async {
+    // 1. Restock items in memory
+    if (restockItems) {
+      for (final item in returnedItems) {
+        final pIdx = _products.indexWhere((p) => p.name == item.name);
+        if (pIdx >= 0) {
+          final p = _products[pIdx];
+          _products[pIdx] = p.copyWith(stock: p.stock + item.quantity);
+        }
+      }
+    }
+
+    // 2. Adjust customer Udhar Khata if refunded via Credit / Udhar
+    if (refundMethod.contains('Credit') || refundMethod.contains('Udhar')) {
+      final bIdx = _todayBills.indexWhere((b) => b.billNumber == billNumber);
+      if (bIdx >= 0) {
+        final bill = _todayBills[bIdx];
+        final cIdx = _customers.indexWhere(
+          (c) => c.name == bill.customerName || (bill.customerPhone.isNotEmpty && c.phone == bill.customerPhone),
+        );
+        if (cIdx >= 0) {
+          final c = _customers[cIdx];
+          _customers[cIdx] = c.copyWith(
+            udharBalance: (c.udharBalance - refundAmount).clamp(0.0, 999999.0),
+          );
+        }
+      }
+    }
+
+    // 3. Add a refund transaction record in memory
+    final now = DateTime.now();
+    _transactions.insert(
+      0,
+      FullTransactionModel(
+        id: 'ret-${now.millisecondsSinceEpoch}',
+        receiptNumber: 'RET-$billNumber',
+        title: 'Return • Bill #$billNumber',
+        subtitle: '$refundMethod • Returned ${returnedItems.length} items',
+        partyName: 'Customer',
+        timestamp: now,
+        amount: refundAmount,
+        category: TransactionCategory.sale,
+        paymentMethod: refundMethod,
+        status: 'REFUNDED',
+        items: returnedItems,
+        note: 'Sales Return: $reason',
+      ),
+    );
+
+    _updateDashboardMetrics();
+    notifyListeners();
+
+    // 4. Record in SQLite via SaleDao
+    try {
+      await _saleDao.returnItems(
+        receiptNumber: billNumber,
+        returnedItems: returnedItems.map((it) => {
+          'name': it.name,
+          'quantity': it.quantity,
+          'unit': it.unit,
+          'rate': it.rate,
+          'total': it.total,
+          'restock': restockItems,
+        }).toList(),
+        reason: reason,
+        refundMethod: refundMethod,
+        refundAmount: refundAmount,
+      );
+      SyncEngine.instance.syncNow();
+    } catch (e) {
+      debugPrint('SQLite returnItems note: $e');
+    }
+
+    // 5. Sync to backend API if available
+    try {
+      await _saleService.returnItems(
+        receiptNumber: billNumber,
+        items: returnedItems.map((it) => {
+          'name': it.name,
+          'quantity': it.quantity,
+          'rate': it.rate,
+          'total': it.total,
+        }).toList(),
+        reason: reason,
+        refundMethod: refundMethod,
+        refundAmount: refundAmount,
+      );
+    } catch (_) {}
+
+    return true;
   }
 
   // ==================== EXPENSES ====================

@@ -74,6 +74,26 @@ class SaleBackendService {
     );
   }
 
+  /// Process item return / sales return for an invoice
+  Future<ApiResponse<Map<String, dynamic>>> returnItems({
+    required String receiptNumber,
+    required List<Map<String, dynamic>> items,
+    required String reason,
+    required String refundMethod,
+    required double refundAmount,
+  }) async {
+    return _client.post<Map<String, dynamic>>(
+      '${ApiConfig.sales}/$receiptNumber/return',
+      body: {
+        'items': items,
+        'reason': reason,
+        'refund_method': refundMethod,
+        'refund_amount': refundAmount,
+      },
+      fromData: (data) => data as Map<String, dynamic>,
+    );
+  }
+
   /// Fetch all transactions ledger history
   Future<ApiResponse<Map<String, dynamic>>> getTransactions({int limit = 50}) async {
     return _client.get<Map<String, dynamic>>(

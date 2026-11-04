@@ -170,3 +170,4 @@ class SyncOutboxDao {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 }
+

@@ -47,3 +47,4 @@ class DatabaseConstants {
   static const String entityExpense = 'expense';
   static const String entityStockMovement = 'stock_movement';
 }
+

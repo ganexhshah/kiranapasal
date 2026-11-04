@@ -198,6 +198,113 @@ void main() {
       );
     });
 
+    test('SaleDao: cancelSale voids bill, restores inventory, and enqueues sync', () async {
+      const prod = Product(
+        id: 'prod_biscuit',
+        name: 'Marie Gold Biscuits',
+        category: 'Snacks',
+        sku: 'MG-100G',
+        price: 30.0,
+        priceUnit: 'pkt',
+        stock: 50,
+        stockUnit: 'pkt',
+      );
+      await productDao.upsertProduct(prod);
+
+      const cartItem = CartItem(
+        product: prod,
+        unit: 'pkt',
+        quantity: 5,
+        unitPrice: 30.0,
+      );
+
+      final sale = await saleDao.createSale(
+        items: [cartItem],
+        subtotal: 150.0,
+        grandTotal: 150.0,
+        paymentMethod: 'Cash',
+      );
+      final receiptNo = sale['receipt_number'] as String;
+
+      // Stock reduced to 45
+      var p = await productDao.getProductById('prod_biscuit');
+      expect(p!.stock, 45.0);
+
+      // Void the bill
+      final success = await saleDao.cancelSale(
+        receiptNumber: receiptNo,
+        reason: 'Customer cancelled order',
+      );
+      expect(success, isTrue);
+
+      // Stock must be restored to 50
+      p = await productDao.getProductById('prod_biscuit');
+      expect(p!.stock, 50.0);
+
+      // Bill should no longer appear in active today bills
+      final bills = await saleDao.getBillsForDate(date: DateTime.now());
+      expect(bills.any((b) => b.billNumber == receiptNo), isFalse);
+    });
+
+    test('SaleDao: returnItems processes partial item return and restocks inventory', () async {
+      const prod = Product(
+        id: 'prod_tea',
+        name: 'Tokla CTC Tea 500g',
+        category: 'Beverages',
+        sku: 'TEA-500G',
+        price: 350.0,
+        priceUnit: 'pkt',
+        stock: 20,
+        stockUnit: 'pkt',
+      );
+      await productDao.upsertProduct(prod);
+
+      const cartItem = CartItem(
+        product: prod,
+        unit: 'pkt',
+        quantity: 3,
+        unitPrice: 350.0,
+      );
+
+      final sale = await saleDao.createSale(
+        items: [cartItem],
+        subtotal: 1050.0,
+        grandTotal: 1050.0,
+        paymentMethod: 'Cash',
+      );
+      final receiptNo = sale['receipt_number'] as String;
+
+      // Stock is 17
+      var p = await productDao.getProductById('prod_tea');
+      expect(p!.stock, 17.0);
+
+      // Customer returns 1 packet
+      final returnResult = await saleDao.returnItems(
+        receiptNumber: receiptNo,
+        returnedItems: [
+          {
+            'name': 'Tokla CTC Tea 500g',
+            'product_id': 'prod_tea',
+            'quantity': 1.0,
+            'unit': 'pkt',
+            'rate': 350.0,
+            'total': 350.0,
+            'restock': true,
+          }
+        ],
+        reason: 'Customer took 1 extra by mistake',
+        refundMethod: 'Cash',
+        refundAmount: 350.0,
+      );
+
+      expect(returnResult['success'], isTrue);
+      expect(returnResult['refund_amount'], 350.0);
+
+      // Stock must be restored from 17 back to 18
+      p = await productDao.getProductById('prod_tea');
+      expect(p!.stock, 18.0);
+    });
+
     test('ExpenseDao: record and query expenses', () async {
       final expId = await expenseDao.recordExpense(
         title: 'Shop Electricity Bill',

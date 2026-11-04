@@ -4,13 +4,13 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:barcode_widget/barcode_widget.dart';
-import '../../../../core/repositories/app_data_repository.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/services/printing_service.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/widgets/app_top_bar.dart';
 import '../../domain/models/sale_record.dart';
 import '../sheets/bill_actions_sheet.dart';
+import '../sheets/cancel_return_bill_sheet.dart';
 
 /// Item in a transaction invoice / receipt.
 class TransactionDetailItem {
@@ -207,39 +207,24 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
       } else if (action == BillActionType.share) {
         _handleShare();
       } else if (action == BillActionType.cancel) {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Void this bill?'),
-            content: Text(
-              'Bill #${widget.receiptNumber} will be cancelled and its items returned to stock. '
-              'This cannot be undone.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Keep bill'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
-                child: const Text('Void bill'),
-              ),
-            ],
-          ),
+        final result = await CancelReturnBillSheet.show(
+          context,
+          billNumber: widget.receiptNumber,
+          totalAmount: widget.totalAmount,
+          paymentMethod: widget.paymentMethod,
+          items: widget.items,
+          customerName: widget.customerName,
+          customerPhone: widget.customerPhone,
+          timestamp: widget.timestamp,
+          udharAmount: widget.udharAmount,
+          status: _isCancelled ? 'VOID' : widget.paymentStatus,
         );
-        if (confirmed != true || !mounted) return;
 
-        await AppDataRepository.instance
-            .voidBill(widget.receiptNumber, 'Voided from bill details');
-        if (!mounted) return;
-        setState(() => _isCancelled = true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Bill #${widget.receiptNumber} voided'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
+        if (result != null && mounted) {
+          setState(() {
+            _isCancelled = true;
+          });
+        }
       }
     }
   }
@@ -1453,6 +1438,103 @@ class _TransactionDetailsScreenState extends State<TransactionDetailsScreen> {
             ],
           ),
         ),
+        // Invoice Management Actions (Void / Return)
+        if (!_isCancelled && widget.paymentStatus != 'REFUNDED') ...[
+          const Gap(14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Invoice Management',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: colors.darkText,
+                  ),
+                ),
+                const Gap(4),
+                const Text(
+                  'Need to correct a mistake or take back items? You can void the whole bill or process partial returns.',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                ),
+                const Gap(14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final result = await CancelReturnBillSheet.show(
+                            context,
+                            billNumber: widget.receiptNumber,
+                            totalAmount: widget.totalAmount,
+                            paymentMethod: widget.paymentMethod,
+                            items: widget.items,
+                            customerName: widget.customerName,
+                            customerPhone: widget.customerPhone,
+                            timestamp: widget.timestamp,
+                            udharAmount: widget.udharAmount,
+                            initialIsReturn: true,
+                            status: widget.paymentStatus,
+                          );
+                          if (result != null && mounted) {
+                            setState(() => _isCancelled = true);
+                          }
+                        },
+                        icon: const Icon(LucideIcons.rotateCcw, size: 15, color: Color(0xFF2563EB)),
+                        label: const Text('Return Items'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2563EB),
+                          side: const BorderSide(color: Color(0xFFBFDBFE)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                    const Gap(10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final result = await CancelReturnBillSheet.show(
+                            context,
+                            billNumber: widget.receiptNumber,
+                            totalAmount: widget.totalAmount,
+                            paymentMethod: widget.paymentMethod,
+                            items: widget.items,
+                            customerName: widget.customerName,
+                            customerPhone: widget.customerPhone,
+                            timestamp: widget.timestamp,
+                            udharAmount: widget.udharAmount,
+                            initialIsReturn: false,
+                            status: widget.paymentStatus,
+                          );
+                          if (result != null && mounted) {
+                            setState(() => _isCancelled = true);
+                          }
+                        },
+                        icon: const Icon(LucideIcons.ban, size: 15, color: Color(0xFFEF4444)),
+                        label: const Text('Void Bill'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFEF4444),
+                          side: const BorderSide(color: Color(0xFFFECACA)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
         const Gap(24),
       ],
     );

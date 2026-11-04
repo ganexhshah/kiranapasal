@@ -10,6 +10,7 @@ import '../../../../core/utils/parse_utils.dart';
 import '../../../../core/widgets/core_widgets.dart';
 import '../sheets/bill_actions_sheet.dart';
 import '../sheets/bill_date_picker_sheet.dart';
+import '../sheets/cancel_return_bill_sheet.dart';
 import 'sales_screen.dart';
 import 'transaction_details_screen.dart';
 
@@ -328,38 +329,9 @@ class _TodayBillsScreenState extends State<TodayBillsScreen> {
           }
         }
       } else if (action == BillActionType.cancel) {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Void this bill?'),
-            content: Text(
-              'Bill #${bill.billNumber} will be cancelled and its items returned to stock. '
-              'This cannot be undone.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Keep bill'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
-                child: const Text('Void bill'),
-              ),
-            ],
-          ),
-        );
-        if (confirmed != true || !mounted) return;
-        await AppDataRepository.instance.voidBill(
-          bill.billNumber,
-          'Voided from today\'s bills',
-        );
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Bill #${bill.billNumber} voided'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
+        await CancelReturnBillSheet.showFromBill(
+          context,
+          bill: bill,
         );
       }
     }
